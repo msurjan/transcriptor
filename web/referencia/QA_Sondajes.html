@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graiph — QA Transcripción de Sondajes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Hanken+Grotesk:wght@100..900&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{
+    --bg:#0A0B14; --panel:#14162A; --panel2:#1A1D33; --line:#242843; --line2:#343A5C;
+    --ink:#ECEEF5; --muted:#9AA0B8; --muted2:#646B86;
+    --green:#34CC67; --green-br:#4BE07D; --green-dp:#1E9A48;
+    --amber:#E0B84B; --red:#E05B4B; --navy:#121423;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Hanken Grotesk',sans-serif;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden;font-size:13px;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--green);}
+
+  .app-bar{
+    background:rgba(10,11,20,.92); border-bottom:1px solid var(--line);
+    padding:10px 18px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  }
+  .bar-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1rem;
+    background:linear-gradient(90deg,#fff 30%,var(--green-br) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
+  .bar-sub{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+
+  .filebtn{
+    background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+    padding:7px 12px; border-radius:8px; font-size:.76rem; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; gap:6px; transition:border-color .15s;
+  }
+  .filebtn:hover{border-color:var(--green-br);}
+  .filebtn input{display:none;}
+  .filebtn.ok{border-color:var(--green); color:var(--green-br);}
+
+  select.holepick{background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    border-radius:8px;padding:7px 10px;font-size:.76rem;font-weight:700;}
+
+  .spacer{flex:1;}
+  .progress-wrap{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--muted);}
+  .progress-bar{width:140px;height:7px;background:var(--panel2);border-radius:4px;overflow:hidden;border:1px solid var(--line);}
+  .progress-fill{height:100%;background:var(--grad,var(--green));transition:width .2s;}
+
+  .btn-export{
+    background:linear-gradient(135deg,var(--green-br),var(--green-dp)); color:#06170C;
+    border:none; padding:8px 16px; border-radius:8px; font-weight:800; font-size:.78rem; cursor:pointer;
+    box-shadow:0 3px 12px rgba(52,204,103,.25);
+  }
+  .btn-export:hover{filter:brightness(1.08);}
+  .btn-export:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;}
+
+  .workspace{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 52px);}
+
+  /* ---------- LEFT: PDF ---------- */
+  .pdf-pane{border-right:1px solid var(--line);display:flex;flex-direction:column;background:#05060B;}
+  .pdf-toolbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap;}
+  .pg-btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);width:26px;height:26px;border-radius:6px;cursor:pointer;font-weight:700;}
+  .pg-btn:hover{border-color:var(--green-br);}
+  .pg-label{font-size:.76rem;font-family:var(--mono);color:var(--muted);min-width:70px;text-align:center;}
+  .calib-status{font-size:.68rem;padding:3px 9px;border-radius:12px;font-weight:700;letter-spacing:.02em;}
+  .calib-status.no{background:rgba(224,91,75,.15);color:var(--red);border:1px solid rgba(224,91,75,.4);}
+  .calib-status.yes{background:rgba(52,204,103,.15);color:var(--green-br);border:1px solid rgba(52,204,103,.4);}
+  .btn-calib{background:var(--navy);border:1px solid var(--line2);color:var(--green-br);font-size:.72rem;font-weight:700;padding:6px 10px;border-radius:7px;cursor:pointer;}
+  .btn-calib:hover{border-color:var(--green-br);}
+  .btn-calib.active{background:var(--amber);color:#241C00;border-color:var(--amber);}
+
+  .canvas-wrap{flex:1;overflow:auto;display:flex;justify-content:center;padding:14px;position:relative;}
+  .canvas-stack{position:relative;box-shadow:0 8px 30px rgba(0,0,0,.5);}
+  .canvas-stack canvas{display:block;}
+  #overlayCanvas{position:absolute;top:0;left:0;cursor:crosshair;}
+  .empty-hint{margin:auto;color:var(--muted2);font-size:.85rem;text-align:center;max-width:320px;line-height:1.5;}
+
+  /* ---------- RIGHT: TABLE ---------- */
+  .table-pane{display:flex;flex-direction:column;overflow:hidden;}
+  .table-toolbar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--panel);}
+  .filter-chip{font-size:.7rem;padding:5px 11px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer;font-weight:700;}
+  .filter-chip.active{border-color:var(--green-br);color:var(--green-br);background:rgba(52,204,103,.08);}
+  .kbd-hint{font-size:.66rem;color:var(--muted2);font-family:var(--mono);margin-left:auto;}
+  kbd{background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:1px 5px;font-size:.65rem;}
+
+  .table-scroll{flex:1;overflow:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.74rem;}
+  thead th{position:sticky;top:0;background:#1F3864;color:#fff;padding:6px 7px;font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;text-align:left;white-space:nowrap;z-index:5;border-right:1px solid rgba(255,255,255,.08);}
+  tbody td{padding:3px 5px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap;}
+  tbody tr:hover{background:rgba(255,255,255,.02);}
+  tbody tr.selected{background:rgba(75,224,125,.10) !important;box-shadow:inset 3px 0 0 var(--green-br);}
+  .depth-cell{font-family:var(--mono);font-weight:700;color:var(--green-br);cursor:pointer;user-select:none;padding:5px 8px !important;}
+  .depth-cell:hover{text-decoration:underline;}
+  tbody input{width:100%;background:transparent;border:1px solid transparent;color:var(--ink);font-size:.74rem;padding:3px 4px;border-radius:4px;font-family:inherit;}
+  tbody input:focus{outline:none;border-color:var(--green-br);background:var(--panel2);}
+  tbody tr.status-Aprobado{box-shadow:inset 3px 0 0 var(--green);}
+  tbody tr.status-Corregido{box-shadow:inset 3px 0 0 var(--amber);}
+  tbody tr.status-Rechazado{box-shadow:inset 3px 0 0 var(--red);}
+  tbody tr.selected.status-Aprobado{background:rgba(52,204,103,.14) !important;}
+  tbody tr.selected.status-Corregido{background:rgba(224,184,75,.14) !important;}
+  tbody tr.selected.status-Rechazado{background:rgba(224,91,75,.14) !important;}
+
+  .status-cell{display:flex;gap:3px;}
+  .status-btn{width:22px;height:22px;border-radius:5px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-size:.65rem;font-weight:800;cursor:pointer;line-height:1;}
+  .status-btn[data-s="Aprobado"]:hover,.status-btn[data-s="Aprobado"].on{background:var(--green);color:#06170C;border-color:var(--green);}
+  .status-btn[data-s="Corregido"]:hover,.status-btn[data-s="Corregido"].on{background:var(--amber);color:#241C00;border-color:var(--amber);}
+  .status-btn[data-s="Rechazado"]:hover,.status-btn[data-s="Rechazado"].on{background:var(--red);color:#2A0A06;border-color:var(--red);}
+
+  .drop-hint{font-size:.72rem;color:var(--muted2);padding:40px 20px;text-align:center;}
+</style>
+</head>
+<body>
+
+<header class="app-bar">
+  <div>
+    <div class="bar-title">Graiph — QA Transcripción</div>
+    <div class="bar-sub">Comparación PDF ↔ Excel, fila por fila</div>
+  </div>
+
+  <label class="filebtn" id="btnPdf">📄 Cargar PDF (original escaneado)
+    <input type="file" id="inputPdf" accept="application/pdf">
+  </label>
+  <label class="filebtn" id="btnXlsx">📊 Cargar Excel (transcripción)
+    <input type="file" id="inputXlsx" accept=".xlsx,.xls">
+  </label>
+  <select class="holepick" id="sheetPicker" style="display:none;"></select>
+
+  <div class="spacer"></div>
+
+  <div class="progress-wrap" id="progressWrap" style="display:none;">
+    <span id="progressTxt">0 / 0 revisadas</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+  </div>
+
+  <button class="btn-export" id="btnExport" disabled>⬇ Exportar Excel revisado</button>
+</header>
+
+<div class="workspace">
+
+  <!-- ============ PDF PANE ============ -->
+  <div class="pdf-pane">
+    <div class="pdf-toolbar">
+      <button class="pg-btn" id="pgPrev">‹</button>
+      <span class="pg-label" id="pgLabel">— / —</span>
+      <button class="pg-btn" id="pgNext">›</button>
+      <span class="calib-status no" id="calibStatus">Página sin calibrar</span>
+      <button class="btn-calib" id="btnCalib">🎯 Calibrar página</button>
+      <span class="kbd-hint" id="calibHint"></span>
+    </div>
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="empty-hint">Carga el PDF original del sondaje.<br><br>Cuando cargues también el Excel, selecciona una fila (columna Desde/Hasta) y la página correcta va a aparecer sola — pero primero cada página necesita <strong>una calibración de 2 clics</strong> (una sola vez por página, no por fila).</div>
+    </div>
+  </div>
+
+  <!-- ============ TABLE PANE ============ -->
+  <div class="table-pane">
+    <div class="table-toolbar">
+      <div class="filter-chip active" data-f="Todas">Todas</div>
+      <div class="filter-chip" data-f="Pendiente">Pendientes</div>
+      <div class="filter-chip" data-f="Aprobado">Aprobadas</div>
+      <div class="filter-chip" data-f="Corregido">Corregidas</div>
+      <div class="filter-chip" data-f="Rechazado">Rechazadas</div>
+      <span class="kbd-hint">↑↓ mover · <kbd>1</kbd> Aprobar <kbd>2</kbd> Corregir <kbd>3</kbd> Rechazar</span>
+    </div>
+    <div class="table-scroll" id="tableScroll">
+      <div class="drop-hint">Carga el Excel de la transcripción para empezar la revisión.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ============================================================
+   ESTADO GLOBAL
+============================================================ */
+const state = {
+  workbook: null,
+  sheetName: null,
+  headers: [],          // nombres de columna en orden
+  colFrom: -1,
+  colTo: -1,
+  rows: [],             // array de objetos {__status, __comment, c0, c1, ...} indexado por columna
+  selectedRow: -1,
+  activeFilter: 'Todas',
+
+  pdfDoc: null,
+  currentPage: 1,
+  numPages: 0,
+  pageCalibration: {},   // { [pageNum]: {yTop, depthTop, yBottom, depthBottom} }
+  calibMode: false,
+  calibClickCount: 0,
+  calibPending: {},
+  renderScale: 1.4
+};
+
+const STATUS_LIST = ['Pendiente','Aprobado','Corregido','Rechazado'];
+
+/* ============================================================
+   CARGA DE EXCEL
+============================================================ */
+document.getElementById('inputXlsx').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const buf = await file.arrayBuffer();
+  state.workbook = XLSX.read(buf, { type: 'array' });
+  document.getElementById('btnXlsx').classList.add('ok');
+
+  const picker = document.getElementById('sheetPicker');
+  picker.innerHTML = '';
+  state.workbook.SheetNames.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    picker.appendChild(opt);
+  });
+  picker.style.display = 'inline-block';
+
+  // preferir una hoja que tenga pinta de tabla de datos (con Desde/Hasta)
+  let guess = state.workbook.SheetNames[0];
+  for (const name of state.workbook.SheetNames) {
+    if (findHeaderRow(XLSX.utils.sheet_to_json(state.workbook.Sheets[name], {header:1, defval:''})).idx >= 0) {
+      guess = name; break;
+    }
+  }
+  picker.value = guess;
+  loadSheet(guess);
+  picker.onchange = () => loadSheet(picker.value);
+});
+
+function findHeaderRow(aoa) {
+  for (let i = 0; i < Math.min(aoa.length, 12); i++) {
+    const row = aoa[i].map(c => String(c).trim().toLowerCase());
+    const hasFrom = row.some(c => /^(from|desde)/.test(c));
+    const hasTo   = row.some(c => /^(to|hasta)/.test(c));
+    if (hasFrom && hasTo) return { idx: i, row: aoa[i] };
+  }
+  return { idx: -1, row: null };
+}
+
+function loadSheet(sheetName) {
+  state.sheetName = sheetName;
+  const aoa = XLSX.utils.sheet_to_json(state.workbook.Sheets[sheetName], { header: 1, defval: '' });
+  const { idx: headerIdx, row: headerRow } = findHeaderRow(aoa);
+
+  if (headerIdx < 0) {
+    document.getElementById('tableScroll').innerHTML =
+      '<div class="drop-hint">No encontré una columna "From/Desde" y "To/Hasta" en esta hoja. Elige otra hoja del desplegable.</div>';
+    return;
+  }
+
+  state.headers = headerRow.map(h => String(h).trim() || '(sin nombre)');
+  state.colFrom = state.headers.findIndex(h => /^(from|desde)/i.test(h));
+  state.colTo   = state.headers.findIndex(h => /^(to|hasta)/i.test(h));
+
+  // asegurar columnas de QA propias (si no existen en el archivo, se agregan)
+  let colStatus = state.headers.findIndex(h => /^estado_qa$/i.test(h));
+  let colComment = state.headers.findIndex(h => /^comentario_qa$/i.test(h));
+  if (colStatus < 0) { state.headers.push('Estado_QA'); colStatus = state.headers.length - 1; }
+  if (colComment < 0) { state.headers.push('Comentario_QA'); colComment = state.headers.length - 1; }
+  state.colStatus = colStatus;
+  state.colComment = colComment;
+
+  state.rows = [];
+  for (let i = headerIdx + 1; i < aoa.length; i++) {
+    const r = aoa[i];
+    const fromVal = r[state.colFrom];
+    if (fromVal === '' || fromVal === undefined || isNaN(parseFloat(fromVal))) break; // fin de la tabla de datos
+    const rowArr = state.headers.map((_, ci) => (r[ci] !== undefined ? r[ci] : ''));
+    if (!rowArr[colStatus]) rowArr[colStatus] = 'Pendiente';
+    state.rows.push(rowArr);
+  }
+
+  state.selectedRow = -1;
+  renderTable();
+  updateProgress();
+  document.getElementById('btnExport').disabled = false;
+}
+
+/* ============================================================
+   TABLA
+============================================================ */
+function renderTable() {
+  const wrap = document.getElementById('tableScroll');
+  if (!state.rows.length) { wrap.innerHTML = '<div class="drop-hint">Sin filas.</div>'; return; }
+
+  const visibleCols = state.headers.map((h, i) => i).filter(i => i !== state.colStatus); // status se dibuja aparte
+  let html = '<table><thead><tr><th>Estado</th>';
+  visibleCols.forEach(ci => html += `<th>${escapeHtml(state.headers[ci])}</th>`);
+  html += '</tr></thead><tbody>';
+
+  state.rows.forEach((row, ri) => {
+    const status = row[state.colStatus] || 'Pendiente';
+    if (state.activeFilter !== 'Todas' && status !== state.activeFilter) return;
+    html += `<tr data-ri="${ri}" class="${ri === state.selectedRow ? 'selected ' : ''}status-${status}">`;
+    html += `<td><div class="status-cell">`;
+    ['Aprobado','Corregido','Rechazado'].forEach(s => {
+      html += `<button class="status-btn ${status===s?'on':''}" data-s="${s}" data-ri="${ri}" title="${s}">${s[0]}</button>`;
+    });
+    html += `</div></td>`;
+    visibleCols.forEach(ci => {
+      if (ci === state.colFrom || ci === state.colTo) {
+        html += `<td class="depth-cell" data-ri="${ri}">${escapeHtml(row[ci])}</td>`;
+      } else {
+        html += `<td><input value="${escapeAttr(row[ci])}" data-ri="${ri}" data-ci="${ci}"></td>`;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+
+  // listeners
+  wrap.querySelectorAll('.depth-cell').forEach(td => {
+    td.addEventListener('click', () => selectRow(parseInt(td.dataset.ri)));
+  });
+  wrap.querySelectorAll('.status-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setStatus(parseInt(btn.dataset.ri), btn.dataset.s);
+    });
+  });
+  wrap.querySelectorAll('tbody input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      state.rows[parseInt(inp.dataset.ri)][parseInt(inp.dataset.ci)] = inp.value;
+    });
+    inp.addEventListener('focus', () => selectRow(parseInt(inp.dataset.ri), false));
+  });
+}
+
+function escapeHtml(v){ return String(v).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function escapeAttr(v){ return String(v).replace(/"/g,'&quot;'); }
+
+function setStatus(ri, status) {
+  const current = state.rows[ri][state.colStatus];
+  state.rows[ri][state.colStatus] = (current === status) ? 'Pendiente' : status;
+  renderTable();
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = state.rows.length;
+  const done = state.rows.filter(r => r[state.colStatus] && r[state.colStatus] !== 'Pendiente').length;
+  document.getElementById('progressWrap').style.display = total ? 'flex' : 'none';
+  document.getElementById('progressTxt').textContent = `${done} / ${total} revisadas`;
+  document.getElementById('progressFill').style.width = total ? `${(done/total*100).toFixed(0)}%` : '0%';
+}
+
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    state.activeFilter = chip.dataset.f;
+    renderTable();
+  });
+});
+
+/* ============================================================
+   CARGA DE PDF
+============================================================ */
+document.getElementById('inputPdf').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const buf = await file.arrayBuffer();
+  state.pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+  state.numPages = state.pdfDoc.numPages;
+  state.currentPage = 1;
+  state.pageCalibration = {};
+  document.getElementById('btnPdf').classList.add('ok');
+  renderPdfPage(1);
+});
+
+document.getElementById('pgPrev').addEventListener('click', () => {
+  if (state.currentPage > 1) renderPdfPage(state.currentPage - 1);
+});
+document.getElementById('pgNext').addEventListener('click', () => {
+  if (state.currentPage < state.numPages) renderPdfPage(state.currentPage + 1);
+});
+
+async function renderPdfPage(num) {
+  if (!state.pdfDoc) return;
+  cancelCalibration();
+  state.currentPage = num;
+  const page = await state.pdfDoc.getPage(num);
+  const viewport = page.getViewport({ scale: state.renderScale });
+
+  const wrap = document.getElementById('canvasWrap');
+  wrap.innerHTML = '<div class="canvas-stack" id="canvasStack"></div>';
+  const stack = document.getElementById('canvasStack');
+
+  const pdfCanvas = document.createElement('canvas');
+  pdfCanvas.width = viewport.width; pdfCanvas.height = viewport.height;
+  pdfCanvas.style.width = '620px';
+  pdfCanvas.style.height = (620 * viewport.height / viewport.width) + 'px';
+  stack.appendChild(pdfCanvas);
+
+  const overlay = document.createElement('canvas');
+  overlay.id = 'overlayCanvas';
+  overlay.width = viewport.width; overlay.height = viewport.height;
+  overlay.style.width = pdfCanvas.style.width;
+  overlay.style.height = pdfCanvas.style.height;
+  stack.appendChild(overlay);
+
+  await page.render({ canvasContext: pdfCanvas.getContext('2d'), viewport }).promise;
+
+  overlay.addEventListener('click', onOverlayClick);
+
+  document.getElementById('pgLabel').textContent = `Pág. ${num} / ${state.numPages}`;
+  updateCalibStatusUI();
+
+  // si la fila seleccionada cae en esta página, redibujar su banda
+  if (state.selectedRow >= 0) drawHighlightForSelected();
+}
+
+/* ============================================================
+   CALIBRACION (2 clics por pagina = escala lineal profundidad<->pixel)
+============================================================ */
+document.getElementById('btnCalib').addEventListener('click', () => {
+  if (state.calibMode) { cancelCalibration(); return; }
+  state.calibMode = true;
+  state.calibClickCount = 0;
+  state.calibPending = {};
+  document.getElementById('btnCalib').classList.add('active');
+  document.getElementById('calibHint').textContent = 'Clic en un punto de profundidad CONOCIDA (ej. borde superior de la fila 0-1)…';
+});
+
+function cancelCalibration() {
+  state.calibMode = false;
+  document.getElementById('btnCalib').classList.remove('active');
+  document.getElementById('calibHint').textContent = '';
+}
+
+function onOverlayClick(e) {
+  const overlay = document.getElementById('overlayCanvas');
+  const rect = overlay.getBoundingClientRect();
+  const scaleX = overlay.width / rect.width;
+  const scaleY = overlay.height / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+
+  if (!state.calibMode) return; // fuera de modo calibración, un clic en la imagen no hace nada
+
+  const depthStr = prompt(state.calibClickCount === 0
+    ? '¿Qué profundidad (m) representa este punto?'
+    : '¿Y este segundo punto — qué profundidad (m) representa?');
+  const depth = parseFloat(depthStr);
+  if (depthStr === null || isNaN(depth)) return; // cancelado
+
+  drawCalibMarker(x, y, state.calibClickCount === 0 ? '1' : '2');
+
+  if (state.calibClickCount === 0) {
+    state.calibPending = { yA: y, depthA: depth };
+    state.calibClickCount = 1;
+    document.getElementById('calibHint').textContent = 'Ahora clic en un SEGUNDO punto de profundidad conocida, bien separado del primero…';
+  } else {
+    const { yA, depthA } = state.calibPending;
+    if (Math.abs(depth - depthA) < 0.01 || Math.abs(y - yA) < 5) {
+      alert('Los dos puntos están demasiado cerca — elige puntos bien separados (ej. inicio y fin de la página) para que la calibración sea precisa.');
+      cancelCalibration();
+      return;
+    }
+    const yTop = Math.min(yA, y), yBottom = Math.max(yA, y);
+    const depthTop = (yA < y) ? depthA : depth;
+    const depthBottom = (yA < y) ? depth : depthA;
+    state.pageCalibration[state.currentPage] = { yTop, yBottom, depthTop, depthBottom };
+    cancelCalibration();
+    updateCalibStatusUI();
+    if (state.selectedRow >= 0) drawHighlightForSelected();
+  }
+}
+
+function drawCalibMarker(x, y, label) {
+  const overlay = document.getElementById('overlayCanvas');
+  const ctx = overlay.getContext('2d');
+  ctx.save();
+  ctx.fillStyle = '#4BE07D';
+  ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#06170C'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(label, x, y);
+  ctx.restore();
+}
+
+function updateCalibStatusUI() {
+  const el = document.getElementById('calibStatus');
+  const cal = state.pageCalibration[state.currentPage];
+  if (cal) {
+    el.textContent = `Calibrada (${cal.depthTop.toFixed(1)}–${cal.depthBottom.toFixed(1)} m)`;
+    el.className = 'calib-status yes';
+  } else {
+    el.textContent = 'Página sin calibrar';
+    el.className = 'calib-status no';
+  }
+}
+
+/* ============================================================
+   SELECCION DE FILA -> BUSCAR PAGINA + DIBUJAR BANDA
+============================================================ */
+function selectRow(ri, scrollTable = true) {
+  state.selectedRow = ri;
+  document.querySelectorAll('#tableScroll tbody tr').forEach(tr => {
+    tr.classList.toggle('selected', parseInt(tr.dataset.ri) === ri);
+  });
+  if (scrollTable) {
+    const tr = document.querySelector(`#tableScroll tbody tr[data-ri="${ri}"]`);
+    if (tr) tr.scrollIntoView({ block: 'nearest' });
+  }
+
+  const row = state.rows[ri];
+  const from = parseFloat(row[state.colFrom]);
+  const to = parseFloat(row[state.colTo]);
+  if (isNaN(from) || isNaN(to) || !state.pdfDoc) return;
+
+  // ¿alguna página calibrada contiene este tramo?
+  let targetPage = null;
+  for (const [pg, cal] of Object.entries(state.pageCalibration)) {
+    if (from >= cal.depthTop - 0.5 && to <= cal.depthBottom + 0.5) { targetPage = parseInt(pg); break; }
+  }
+
+  if (targetPage === null) {
+    document.getElementById('calibHint').textContent =
+      `Fila ${from}-${to}m: ninguna página calibrada cubre este tramo todavía. Navega a la página correcta y calíbrala.`;
+    return;
+  }
+
+  if (targetPage !== state.currentPage) {
+    renderPdfPage(targetPage).then(() => drawHighlightForSelected());
+  } else {
+    drawHighlightForSelected();
+  }
+}
+
+function drawHighlightForSelected() {
+  const overlay = document.getElementById('overlayCanvas');
+  if (!overlay || state.selectedRow < 0) return;
+  const cal = state.pageCalibration[state.currentPage];
+  if (!cal) return;
+
+  const row = state.rows[state.selectedRow];
+  const from = parseFloat(row[state.colFrom]);
+  const to = parseFloat(row[state.colTo]);
+  if (isNaN(from) || isNaN(to)) return;
+
+  // seguridad: si la fila seleccionada no pertenece al rango calibrado de ESTA
+  // página (ej. el usuario navegó manualmente con ‹ / ›), no dibujar una banda
+  // falsa extrapolada — es preferible no mostrar nada a mostrar algo mal ubicado.
+  const tol = 0.5;
+  if (from < cal.depthTop - tol || to > cal.depthBottom + tol) {
+    overlay.getContext('2d').clearRect(0, 0, overlay.width, overlay.height);
+    return;
+  }
+
+  const depthToY = (d) => cal.yTop + (d - cal.depthTop) / (cal.depthBottom - cal.depthTop) * (cal.yBottom - cal.yTop);
+  const y1 = depthToY(from), y2 = depthToY(to);
+
+  const ctx = overlay.getContext('2d');
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+  ctx.fillStyle = 'rgba(75, 224, 125, 0.28)';
+  ctx.fillRect(0, Math.min(y1,y2), overlay.width, Math.max(2, Math.abs(y2-y1)));
+  ctx.strokeStyle = '#4BE07D'; ctx.lineWidth = 2;
+  ctx.strokeRect(0, Math.min(y1,y2), overlay.width, Math.max(2, Math.abs(y2-y1)));
+}
+
+/* ============================================================
+   TECLADO: ↑↓ navega, 1/2/3 marca estado, 0 vuelve a pendiente
+============================================================ */
+document.addEventListener('keydown', (e) => {
+  const tag = document.activeElement.tagName;
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  if (!state.rows.length) return;
+
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    let next = state.selectedRow;
+    const dir = e.key === 'ArrowDown' ? 1 : -1;
+    do { next += dir; } while (next >= 0 && next < state.rows.length &&
+        state.activeFilter !== 'Todas' && state.rows[next][state.colStatus] !== state.activeFilter);
+    if (next >= 0 && next < state.rows.length) selectRow(next);
+  } else if (['1','2','3'].includes(e.key)) {
+    if (state.selectedRow >= 0) {
+      setStatus(state.selectedRow, {'1':'Aprobado','2':'Corregido','3':'Rechazado'}[e.key]);
+      selectRow(state.selectedRow);
+    }
+  } else if (e.key === '0') {
+    if (state.selectedRow >= 0) { state.rows[state.selectedRow][state.colStatus] = 'Pendiente'; renderTable(); updateProgress(); selectRow(state.selectedRow); }
+  }
+});
+
+/* ============================================================
+   EXPORTAR EXCEL REVISADO
+============================================================ */
+document.getElementById('btnExport').addEventListener('click', () => {
+  if (!state.workbook || !state.rows.length) return;
+  const aoa = [state.headers];
+  state.rows.forEach(r => aoa.push(r));
+  const newSheet = XLSX.utils.aoa_to_sheet(aoa);
+  state.workbook.Sheets[state.sheetName] = newSheet;
+
+  const stamp = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  XLSX.writeFile(state.workbook, `QA_${state.sheetName}_${stamp}.xlsx`);
+});
+</script>
+</body>
+</html>
