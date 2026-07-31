@@ -8,8 +8,10 @@ const elSesionNombre = document.getElementById("sesion-nombre");
 const elSesionRol = document.getElementById("sesion-rol");
 const elBtnCambiar = document.getElementById("btn-cambiar");
 const elLinkTranscriptor = document.getElementById("link-transcriptor");
+const elLinkQa = document.getElementById("link-qa");
 
 const ROLES_CON_TRANSCRIPTOR = ["transcriptor", "admin"];
+const ROLES_CON_QA = ["qa", "admin"];
 
 function mostrarMensaje(texto, esError) {
   elMensaje.textContent = texto;
@@ -22,6 +24,7 @@ function mostrarSesionActiva(usuario) {
   elSesionNombre.textContent = usuario.nombre;
   elSesionRol.textContent = usuario.rol;
   elLinkTranscriptor.hidden = !ROLES_CON_TRANSCRIPTOR.includes(usuario.rol);
+  elLinkQa.hidden = !ROLES_CON_QA.includes(usuario.rol);
 }
 
 function mostrarFormularioLogin() {
