@@ -106,7 +106,7 @@ elSelectorSondaje.addEventListener("change", () => {
 async function cargarSondaje(sondajeId) {
   const { data: sondaje, error: errorSondaje } = await supabaseClient
     .from("sondajes")
-    .select("id, codigo, estado, pdf_path, calibracion_pdf, empresas(nombre)")
+    .select("id, codigo, estado, pdf_path, calibracion_pdf, columnas, empresas(nombre)")
     .eq("id", sondajeId)
     .single();
 
@@ -134,10 +134,18 @@ async function cargarSondaje(sondajeId) {
     return;
   }
 
-  const columnasDatos = [];
-  for (const fila of filas) {
-    for (const clave of Object.keys(fila.datos || {})) {
-      if (!columnasDatos.includes(clave)) columnasDatos.push(clave);
+  // El orden real de las columnas viene de sondajes.columnas (se guarda al
+  // subir el Excel). No se puede confiar en Object.keys(fila.datos): jsonb
+  // no garantiza el orden de las claves de un objeto.
+  let columnasDatos = Array.isArray(sondaje.columnas) ? sondaje.columnas : [];
+  if (columnasDatos.length === 0) {
+    // Sondajes cargados antes de que existiera sondajes.columnas: mejor
+    // esfuerzo con las claves tal como las devuelve Postgres (puede no
+    // coincidir con el Excel original).
+    for (const fila of filas) {
+      for (const clave of Object.keys(fila.datos || {})) {
+        if (!columnasDatos.includes(clave)) columnasDatos.push(clave);
+      }
     }
   }
   state.columnas = ["desde", "hasta", ...columnasDatos, "comentario_qa"];
