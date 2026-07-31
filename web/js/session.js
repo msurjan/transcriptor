@@ -12,3 +12,12 @@ function obtenerUsuarioSesion() {
 function borrarUsuarioSesion() {
   sessionStorage.removeItem(SESSION_KEY);
 }
+
+function exigirUsuarioSesion() {
+  const usuario = obtenerUsuarioSesion();
+  if (!usuario) {
+    window.location.href = "index.html";
+    return null;
+  }
+  return usuario;
+}
