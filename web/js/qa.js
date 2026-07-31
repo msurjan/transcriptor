@@ -65,7 +65,7 @@ const state = {
 
 const ANCHO_BASE_PDF = 620; // px, ancho de referencia al 100% de zoom
 const ZOOM_MIN = 0.5;
-const ZOOM_MAX = 3;
+const ZOOM_MAX = 5;
 const ZOOM_PASO = 0.25;
 
 function escapeHtml(v) {
@@ -552,6 +552,29 @@ function cambiarZoom(delta) {
   aplicarTamanoDisplay();
 }
 
+// Zoom tal que el ancho del PDF llene el ancho visible del panel (lo que
+// pedía el usuario como "350%, ancho de la pantalla todo el PDF") — se
+// calcula en vez de dejarlo fijo porque el ancho disponible cambia según
+// el tamaño de la ventana de cada uno.
+function calcularZoomAjustadoAncho() {
+  const PADDING_WRAP = 28; // 14px a cada lado (ver .canvas-wrap en qa.css)
+  const anchoDisponible = elCanvasWrap.clientWidth - PADDING_WRAP;
+  if (anchoDisponible <= 0) return state.zoom;
+  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(anchoDisponible / ANCHO_BASE_PDF).toFixed(2)));
+}
+
+function enfocarFilaSeleccionadaEnPdf(y1, y2) {
+  state.zoom = calcularZoomAjustadoAncho();
+  elZoomLabel.textContent = `${Math.round(state.zoom * 100)}%`;
+  aplicarTamanoDisplay();
+
+  const overlay = document.getElementById("overlayCanvas");
+  if (!overlay) return;
+  const escalaDisplay = overlay.clientHeight / overlay.height;
+  const yCentroDisplay = ((y1 + y2) / 2) * escalaDisplay;
+  elCanvasWrap.scrollTop = Math.max(0, yCentroDisplay - elCanvasWrap.clientHeight / 2);
+}
+
 elZoomOut.addEventListener("click", () => cambiarZoom(-ZOOM_PASO));
 elZoomIn.addEventListener("click", () => cambiarZoom(ZOOM_PASO));
 
@@ -713,7 +736,7 @@ function selectRow(ri, scrollTable = true) {
   });
   if (scrollTable) {
     const tr = document.querySelector(`#tableScroll tbody tr[data-ri="${ri}"]`);
-    if (tr) tr.scrollIntoView({ block: "nearest" });
+    if (tr) tr.scrollIntoView({ block: "center" });
   }
   renderPanelDetalle();
 
@@ -770,6 +793,8 @@ function drawHighlightForSelected() {
   ctx.strokeStyle = "#4BE07D";
   ctx.lineWidth = 2;
   ctx.strokeRect(0, Math.min(y1, y2), overlay.width, Math.max(2, Math.abs(y2 - y1)));
+
+  enfocarFilaSeleccionadaEnPdf(y1, y2);
 }
 
 /* ============================================================
@@ -810,13 +835,13 @@ const TUTORIAL_PASOS = [
     icono: "👋",
     titulo: "Bienvenido a QA",
     texto:
-      "Acá comparás el PDF original escaneado contra el Excel ya transcrito, fila por fila, para asegurarte de que todo esté bien antes de que el líder lo valide y se le mande al cliente.",
+      "Acá comparas el PDF original escaneado contra el Excel ya transcrito, fila por fila, para asegurarte de que todo esté bien antes de que el líder lo valide y se le mande al cliente.",
   },
   {
     icono: "📋",
-    titulo: "1. Elegí un sondaje",
+    titulo: "1. Elige un sondaje",
     texto:
-      "Arriba a la izquierda, elegí de la lista el sondaje que te toca revisar. Solo aparecen los que ya están listos para revisar (estado \"en_qa\").",
+      "Arriba a la izquierda, elige de la lista el sondaje que te toca revisar. Solo aparecen los que ya están listos para revisar (estado \"en_qa\").",
   },
   {
     icono: "🗂️",
@@ -826,27 +851,27 @@ const TUTORIAL_PASOS = [
   },
   {
     icono: "🎯",
-    titulo: "3. Calibrá cada página del PDF (una vez)",
+    titulo: "3. Calibra cada página del PDF (una vez)",
     texto:
-      "Antes de poder ubicar cada fila en el PDF, hay que calibrar la página: tocá \"🎯 Calibrar página\", hacé clic en un punto de profundidad conocida y decí qué profundidad es, después repetí con un segundo punto bien separado del primero. Se hace una vez por página, no por fila.",
+      "Antes de poder ubicar cada fila en el PDF, hay que calibrar la página: toca \"🎯 Calibrar página\", haz clic en un punto de profundidad conocida y di qué profundidad es, después repite con un segundo punto bien separado del primero. Se hace una vez por página, no por fila.",
   },
   {
     icono: "🔗",
-    titulo: "4. Elegí una fila y mirá el PDF",
+    titulo: "4. Elige una fila y mira el PDF",
     texto:
-      "Tocá cualquier parte de una fila de la tabla — el PDF se ubica solo en la página correcta y resalta en verde el tramo (Desde–Hasta) que le corresponde a esa fila.",
+      "Toca cualquier parte de una fila de la tabla — el PDF se ubica solo en la página correcta y resalta en verde el tramo (Desde–Hasta) que le corresponde a esa fila.",
   },
   {
     icono: "✏️",
-    titulo: "5. Corregí lo que esté mal",
+    titulo: "5. Corrige lo que esté mal",
     texto:
-      "Si algo no coincide con el PDF, editá el valor directo en la tabla. Apenas cambiás algo, esa fila queda marcada \"Corregido\" sola — no hace falta tocar ningún botón.",
+      "Si algo no coincide con el PDF, edita el valor directo en la tabla. Apenas cambias algo, esa fila queda marcada \"Corregido\" sola — no hace falta tocar ningún botón.",
   },
   {
     icono: "✅",
     titulo: "6. Lo que ya está bien, se aprueba solo",
     texto:
-      "Si revisás una fila y no hace falta cambiar nada, pasá a la siguiente (flecha ↓ o clic en otra fila) — la anterior queda marcada \"Aprobado\" sola, sin que tengas que hacer nada más.",
+      "Si revisas una fila y no hace falta cambiar nada, pasa a la siguiente (flecha ↓ o clic en otra fila) — la anterior queda marcada \"Aprobado\" sola, sin que tengas que hacer nada más.",
   },
   {
     icono: "🔍",
@@ -858,7 +883,7 @@ const TUTORIAL_PASOS = [
     icono: "⌨️",
     titulo: "8. Atajos y ajustes",
     texto:
-      "↑↓ para moverte entre filas, 1 para Aprobar, 2 para Corregir, 0 para volver a Pendiente. Arrastrá el borde de una columna para agrandarla, o hacé doble clic para que se ajuste sola. Los botones −/+ junto a \"Calibrar página\" acercan o alejan el PDF.",
+      "↑↓ para moverte entre filas, 1 para Aprobar, 2 para Corregir, 0 para volver a Pendiente. Arrastra el borde de una columna para agrandarla, o haz doble clic para que se ajuste sola. Los botones −/+ junto a \"Calibrar página\" acercan o alejan el PDF.",
   },
   {
     icono: "🚀",

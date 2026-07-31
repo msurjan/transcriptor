@@ -75,7 +75,11 @@ corregir ahí mismo, no reenviar nada.
    `qa.html?sondaje=ID`, revisa fila por fila con el mismo visor PDF↔Excel
    ya construido, pero leyendo/escribiendo contra Supabase en vez de un
    archivo local. Cada fila marcada queda con `revisado_por` = el nombre
-   elegido en el selector de usuario.
+   elegido en el selector de usuario. Al seleccionar una fila (si la página
+   correspondiente ya está calibrada), el visor de PDF hace zoom automático
+   hasta llenar el ancho visible del panel y hace scroll para dejar centrado
+   el tramo (Desde–Hasta) resaltado, así el tramo que se está revisando
+   siempre queda a la vista tanto en la tabla como en el PDF.
 3. Cuando todas las filas de un sondaje tienen `estado_qa != pendiente`, el
    sondaje pasa a `en_validacion`.
 4. **Líder** abre la misma pantalla en modo líder (`qa.html?sondaje=ID&modo=lider`):
