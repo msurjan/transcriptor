@@ -189,7 +189,9 @@ function armarFilasTranscripcion(filasExcel) {
     return { error: "No se encontraron filas válidas en el Excel." };
   }
 
-  return { filas: filasValidas };
+  const columnasOrdenadas = columnas.filter((c) => c !== columnaDesde && c !== columnaHasta);
+
+  return { filas: filasValidas, columnas: columnasOrdenadas };
 }
 
 async function eliminarSondaje(sondajeId) {
@@ -286,7 +288,7 @@ async function manejarEnvio(evento) {
 
   const { error: errorEstado } = await supabaseClient
     .from("sondajes")
-    .update({ pdf_path: rutaPdf, estado: "en_qa" })
+    .update({ pdf_path: rutaPdf, estado: "en_qa", columnas: resultado.columnas })
     .eq("id", sondaje.id);
 
   if (errorEstado) {
