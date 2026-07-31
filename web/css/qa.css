@@ -63,9 +63,11 @@ select.holepick{background:var(--panel2);border:1px solid var(--line);color:var(
 kbd{background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:1px 5px;font-size:.65rem;}
 
 .table-scroll{flex:1;overflow:auto;}
-table{width:100%;border-collapse:collapse;font-size:.74rem;}
-thead th{position:sticky;top:0;background:#1F3864;color:#fff;padding:6px 7px;font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;text-align:left;white-space:nowrap;z-index:5;border-right:1px solid rgba(255,255,255,.08);}
-tbody td{padding:3px 5px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap;}
+table{width:100%;border-collapse:collapse;font-size:.74rem;table-layout:fixed;}
+thead th{position:sticky;top:0;background:#1F3864;color:#fff;padding:6px 7px;font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:5;border-right:1px solid rgba(255,255,255,.08);}
+tbody td{padding:3px 5px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.col-resize{position:absolute;top:0;right:0;width:6px;height:100%;cursor:col-resize;z-index:6;}
+.col-resize:hover,.col-resize:active{background:rgba(75,224,125,.4);}
 tbody tr:hover{background:rgba(255,255,255,.02);}
 tbody tr.selected{background:rgba(75,224,125,.10) !important;box-shadow:inset 3px 0 0 var(--green-br);}
 .depth-cell{font-family:var(--mono);font-weight:700;color:var(--green-br);cursor:pointer;user-select:none;padding:5px 8px !important;}

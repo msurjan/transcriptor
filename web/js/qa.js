@@ -33,6 +33,7 @@ const elTableScroll = document.getElementById("tableScroll");
 const state = {
   sondaje: null,
   columnas: [], // orden de columnas visibles: desde, hasta, ...datos, comentario_qa
+  anchoColumnas: {}, // { [columna]: ancho en px }, "__estado" para la primera columna
   rows: [],
   selectedRow: -1,
   activeFilter: "todas",
@@ -140,6 +141,7 @@ async function cargarSondaje(sondajeId) {
     }
   }
   state.columnas = ["desde", "hasta", ...columnasDatos, "comentario_qa"];
+  state.anchoColumnas = {};
 
   state.rows = filas.map((f) => ({
     id: f.id,
@@ -168,14 +170,28 @@ function valorCelda(row, col) {
   return row.datos[col] ?? "";
 }
 
+function anchoColumna(col) {
+  if (state.anchoColumnas[col] != null) return state.anchoColumnas[col];
+  if (col === "__estado") return 92;
+  if (col === "desde" || col === "hasta") return 70;
+  if (col === "comentario_qa") return 200;
+  return 140;
+}
+
 function renderTable() {
   if (!state.rows.length) {
     elTableScroll.innerHTML = '<div class="drop-hint">Este sondaje no tiene filas.</div>';
     return;
   }
 
-  let html = "<table><thead><tr><th>Estado</th>";
-  state.columnas.forEach((col) => (html += `<th>${escapeHtml(etiquetaColumna(col))}</th>`));
+  let html = "<table><colgroup>";
+  html += `<col data-col="__estado" style="width:${anchoColumna("__estado")}px">`;
+  state.columnas.forEach((col) => (html += `<col data-col="${escapeAttr(col)}" style="width:${anchoColumna(col)}px">`));
+  html += "</colgroup><thead><tr>";
+  html += `<th data-col="__estado">Estado<span class="col-resize" data-col="__estado"></span></th>`;
+  state.columnas.forEach(
+    (col) => (html += `<th data-col="${escapeAttr(col)}">${escapeHtml(etiquetaColumna(col))}<span class="col-resize" data-col="${escapeAttr(col)}"></span></th>`)
+  );
   html += "</tr></thead><tbody>";
 
   state.rows.forEach((row, ri) => {
@@ -219,6 +235,29 @@ function renderTable() {
     inp.addEventListener("blur", () => guardarFila(parseInt(inp.dataset.ri)));
     inp.addEventListener("focus", () => selectRow(parseInt(inp.dataset.ri), false));
   });
+  elTableScroll.querySelectorAll(".col-resize").forEach((manija) => {
+    manija.addEventListener("mousedown", (e) => iniciarResizeColumna(e, manija.dataset.col));
+  });
+}
+
+function iniciarResizeColumna(evento, col) {
+  evento.preventDefault();
+  const elCol = elTableScroll.querySelector(`col[data-col="${CSS.escape(col)}"]`);
+  if (!elCol) return;
+  const anchoInicial = elCol.getBoundingClientRect().width;
+  const xInicial = evento.clientX;
+
+  function mover(e) {
+    const nuevoAncho = Math.max(45, Math.round(anchoInicial + (e.clientX - xInicial)));
+    state.anchoColumnas[col] = nuevoAncho;
+    elCol.style.width = `${nuevoAncho}px`;
+  }
+  function soltar() {
+    document.removeEventListener("mousemove", mover);
+    document.removeEventListener("mouseup", soltar);
+  }
+  document.addEventListener("mousemove", mover);
+  document.addEventListener("mouseup", soltar);
 }
 
 async function guardarFila(ri) {
