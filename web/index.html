@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Graiph — Transcripción de Sondajes</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="card">
+    <h1>Graiph — Transcripción de Sondajes</h1>
+
+    <div id="vista-login">
+      <form id="form-login">
+        <label for="select-usuario">¿Quién eres?</label>
+        <select id="select-usuario" disabled>
+          <option value="" disabled selected>Cargando usuarios...</option>
+        </select>
+        <button type="submit" id="btn-entrar" disabled>Entrar</button>
+      </form>
+      <p id="mensaje" class="mensaje"></p>
+    </div>
+
+    <div id="vista-sesion" class="sesion" hidden>
+      <p>Sesión iniciada como</p>
+      <p class="nombre" id="sesion-nombre"></p>
+      <span class="rol-badge" id="sesion-rol"></span>
+      <br />
+      <button type="button" id="btn-cambiar" class="link-cambiar">Cambiar de usuario</button>
+    </div>
+  </div>
+
+  <script src="vendor/supabase-js.min.js"></script>
+  <script src="config.js"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/session.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
