@@ -163,6 +163,7 @@ async function cargarSondaje(sondajeId) {
   }));
 
   state.selectedRow = -1;
+  autoajustarTodasLasColumnas();
   renderTable();
   updateProgress();
   cargarPdf();
@@ -263,20 +264,28 @@ function medirAnchoTexto(texto, fontCss) {
   return ancho;
 }
 
-function autoajustarColumna(col) {
-  if (col === "__estado") {
-    state.anchoColumnas[col] = 92;
-  } else {
-    const fontEncabezado = "700 11px 'Hanken Grotesk', sans-serif";
-    const fontCelda = "12px 'Hanken Grotesk', sans-serif";
-    let maximo = medirAnchoTexto(etiquetaColumna(col), fontEncabezado);
-    for (const row of state.rows) {
-      const ancho = medirAnchoTexto(valorCelda(row, col), fontCelda);
-      if (ancho > maximo) maximo = ancho;
-    }
-    state.anchoColumnas[col] = Math.max(45, Math.ceil(maximo) + 26);
+function calcularAnchoAjustado(col) {
+  if (col === "__estado") return 92;
+  const fontEncabezado = "700 11px 'Hanken Grotesk', sans-serif";
+  const fontCelda = "12px 'Hanken Grotesk', sans-serif";
+  let maximo = medirAnchoTexto(etiquetaColumna(col), fontEncabezado);
+  for (const row of state.rows) {
+    const ancho = medirAnchoTexto(valorCelda(row, col), fontCelda);
+    if (ancho > maximo) maximo = ancho;
   }
+  return Math.max(45, Math.ceil(maximo) + 26);
+}
+
+function autoajustarColumna(col) {
+  state.anchoColumnas[col] = calcularAnchoAjustado(col);
   renderTable();
+}
+
+function autoajustarTodasLasColumnas() {
+  state.anchoColumnas["__estado"] = calcularAnchoAjustado("__estado");
+  for (const col of state.columnas) {
+    state.anchoColumnas[col] = calcularAnchoAjustado(col);
+  }
 }
 
 function iniciarResizeColumna(evento, col) {
