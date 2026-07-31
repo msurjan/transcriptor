@@ -33,6 +33,10 @@ select.holepick{background:var(--panel2);border:1px solid var(--line);color:var(
 .barra-sesion-qa strong{color:var(--ink);}
 .barra-sesion-qa a{color:var(--green-br);text-decoration:underline;cursor:pointer;background:none;border:none;font-size:.74rem;}
 
+.guardado-estado{font-size:.72rem;font-weight:700;color:var(--green-br);opacity:0;transition:opacity .25s;white-space:nowrap;}
+.guardado-estado.visible{opacity:1;}
+.guardado-estado.error{color:var(--red);}
+
 .workspace{display:grid;grid-template-rows:minmax(0,1fr) minmax(0,1fr);height:calc(100vh - 52px);}
 
 /* ---------- LEFT: PDF ---------- */
@@ -63,6 +67,13 @@ select.holepick{background:var(--panel2);border:1px solid var(--line);color:var(
 kbd{background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:1px 5px;font-size:.65rem;}
 
 .table-scroll{flex:1;overflow:auto;}
+
+.panel-detalle{flex-shrink:0;max-height:180px;overflow-y:auto;border-top:1px solid var(--line);background:var(--panel);padding:10px 14px;display:flex;gap:16px;flex-wrap:wrap;}
+.panel-detalle-vacio{color:var(--muted2);font-size:.78rem;padding:6px 0;}
+.panel-detalle-campo{flex:1;min-width:220px;}
+.panel-detalle-campo label{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-bottom:4px;}
+.panel-detalle-campo textarea{width:100%;min-height:52px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--ink);font-size:.78rem;padding:6px 8px;font-family:inherit;resize:vertical;}
+.panel-detalle-campo textarea:focus{outline:none;border-color:var(--green-br);}
 table{width:100%;border-collapse:collapse;font-size:.74rem;table-layout:fixed;}
 thead th{position:sticky;top:0;background:#1F3864;color:#fff;padding:6px 7px;font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:5;border-right:1px solid rgba(255,255,255,.08);}
 tbody td{padding:3px 5px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}

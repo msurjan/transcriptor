@@ -29,10 +29,14 @@ const elProgressTxt = document.getElementById("progressTxt");
 const elProgressFill = document.getElementById("progressFill");
 
 const elTableScroll = document.getElementById("tableScroll");
+const elPanelDetalle = document.getElementById("panelDetalle");
+const elGuardadoEstado = document.getElementById("guardadoEstado");
 
 const state = {
   sondaje: null,
-  columnas: [], // orden de columnas visibles: desde, hasta, ...datos, comentario_qa
+  columnas: [], // orden completo: desde, hasta, ...datos, comentario_qa
+  columnasCompactas: [], // subset de columnas que se muestra en la tabla
+  columnasDetalle: [], // subset (ej. Confianza) que se muestra en el panel aparte
   anchoColumnas: {}, // { [columna]: ancho en px }, "__estado" para la primera columna
   rows: [],
   selectedRow: -1,
@@ -65,6 +69,25 @@ function etiquetaColumna(col) {
   if (col === "hasta") return "Hasta";
   if (col === "comentario_qa") return "Comentario QA";
   return col.replace(/_/g, " ");
+}
+function esColumnaDetalle(col) {
+  const norm = col.toLowerCase();
+  return norm.includes("confianza") || norm.includes("ambiguedad") || norm.includes("ambigüedad");
+}
+
+let guardadoTimeout = null;
+function mostrarGuardado() {
+  elGuardadoEstado.textContent = "Guardado ✓";
+  elGuardadoEstado.classList.remove("error");
+  elGuardadoEstado.classList.add("visible");
+  clearTimeout(guardadoTimeout);
+  guardadoTimeout = setTimeout(() => elGuardadoEstado.classList.remove("visible"), 1500);
+}
+function mostrarErrorGuardado() {
+  elGuardadoEstado.textContent = "Error al guardar";
+  elGuardadoEstado.classList.add("visible", "error");
+  clearTimeout(guardadoTimeout);
+  guardadoTimeout = setTimeout(() => elGuardadoEstado.classList.remove("visible"), 3000);
 }
 
 /* ============================================================
@@ -149,6 +172,8 @@ async function cargarSondaje(sondajeId) {
     }
   }
   state.columnas = ["desde", "hasta", ...columnasDatos, "comentario_qa"];
+  state.columnasDetalle = columnasDatos.filter(esColumnaDetalle);
+  state.columnasCompactas = state.columnas.filter((c) => !state.columnasDetalle.includes(c));
   state.anchoColumnas = {};
 
   state.rows = filas.map((f) => ({
@@ -165,6 +190,7 @@ async function cargarSondaje(sondajeId) {
   state.selectedRow = -1;
   autoajustarTodasLasColumnas();
   renderTable();
+  renderPanelDetalle();
   updateProgress();
   cargarPdf();
 }
@@ -195,10 +221,10 @@ function renderTable() {
 
   let html = "<table><colgroup>";
   html += `<col data-col="__estado" style="width:${anchoColumna("__estado")}px">`;
-  state.columnas.forEach((col) => (html += `<col data-col="${escapeAttr(col)}" style="width:${anchoColumna(col)}px">`));
+  state.columnasCompactas.forEach((col) => (html += `<col data-col="${escapeAttr(col)}" style="width:${anchoColumna(col)}px">`));
   html += "</colgroup><thead><tr>";
   html += `<th data-col="__estado">Estado<span class="col-resize" data-col="__estado"></span></th>`;
-  state.columnas.forEach(
+  state.columnasCompactas.forEach(
     (col) => (html += `<th data-col="${escapeAttr(col)}">${escapeHtml(etiquetaColumna(col))}<span class="col-resize" data-col="${escapeAttr(col)}"></span></th>`)
   );
   html += "</tr></thead><tbody>";
@@ -212,7 +238,7 @@ function renderTable() {
       html += `<button class="status-btn ${status === s ? "on" : ""}" data-s="${s}" data-ri="${ri}" title="${s}">${s[0].toUpperCase()}</button>`;
     });
     html += `</div></td>`;
-    state.columnas.forEach((col) => {
+    state.columnasCompactas.forEach((col) => {
       const valor = valorCelda(row, col);
       if (col === "desde" || col === "hasta") {
         html += `<td class="depth-cell" data-ri="${ri}">${escapeHtml(valor)}</td>`;
@@ -283,8 +309,25 @@ function autoajustarColumna(col) {
 
 function autoajustarTodasLasColumnas() {
   state.anchoColumnas["__estado"] = calcularAnchoAjustado("__estado");
-  for (const col of state.columnas) {
+  for (const col of state.columnasCompactas) {
     state.anchoColumnas[col] = calcularAnchoAjustado(col);
+  }
+  ajustarAnchosParaCaberEnContenedor();
+}
+
+// Si la suma de anchos "ideales" no entra en el ancho visible de la tabla,
+// se achican todas las columnas en la misma proporción para que la tabla
+// completa quepa sin scroll horizontal.
+function ajustarAnchosParaCaberEnContenedor() {
+  const disponible = elTableScroll.clientWidth;
+  if (!disponible) return;
+  const columnasVisibles = ["__estado", ...state.columnasCompactas];
+  const total = columnasVisibles.reduce((suma, col) => suma + (state.anchoColumnas[col] || 0), 0);
+  if (total <= disponible || total === 0) return;
+  const ANCHO_MINIMO = 45;
+  const factor = disponible / total;
+  for (const col of columnasVisibles) {
+    state.anchoColumnas[col] = Math.max(ANCHO_MINIMO, Math.floor(state.anchoColumnas[col] * factor));
   }
 }
 
@@ -316,8 +359,11 @@ async function guardarFila(ri) {
     .eq("id", fila.id);
   if (error) {
     console.error(error);
+    mostrarErrorGuardado();
     alert("No se pudo guardar el cambio en esa fila. Revisa tu conexión e inténtalo de nuevo.");
+    return;
   }
+  mostrarGuardado();
 }
 
 async function setStatus(ri, status) {
@@ -341,9 +387,11 @@ async function aplicarEstado(ri, nuevoEstado) {
   const { error } = await supabaseClient.from("filas_transcripcion").update(cambios).eq("id", fila.id);
   if (error) {
     console.error(error);
+    mostrarErrorGuardado();
     alert("No se pudo guardar el estado de esa fila. Revisa tu conexión e inténtalo de nuevo.");
     return;
   }
+  mostrarGuardado();
   await revisarTransicionAEnValidacion();
 }
 
@@ -534,8 +582,11 @@ async function guardarCalibracion() {
     .eq("id", state.sondaje.id);
   if (error) {
     console.error(error);
+    mostrarErrorGuardado();
     alert("No se pudo guardar la calibración de esta página. Revisa tu conexión e inténtalo de nuevo.");
+    return;
   }
+  mostrarGuardado();
 }
 
 function drawCalibMarker(x, y, label) {
@@ -566,6 +617,42 @@ function updateCalibStatusUI() {
 }
 
 /* ============================================================
+   PANEL DE DETALLE (columnas tipo Confianza / Nota de confianza)
+============================================================ */
+function renderPanelDetalle() {
+  if (!state.columnasDetalle.length) {
+    elPanelDetalle.hidden = true;
+    elPanelDetalle.innerHTML = "";
+    return;
+  }
+  elPanelDetalle.hidden = false;
+
+  if (state.selectedRow < 0) {
+    const nombres = state.columnasDetalle.map(etiquetaColumna).join(" / ");
+    elPanelDetalle.innerHTML = `<div class="panel-detalle-vacio">Elige una fila para ver ${escapeHtml(nombres)}.</div>`;
+    return;
+  }
+
+  const riSeleccionada = state.selectedRow;
+  const row = state.rows[riSeleccionada];
+  let html = "";
+  state.columnasDetalle.forEach((col) => {
+    html += `<div class="panel-detalle-campo">
+      <label>${escapeHtml(etiquetaColumna(col))}</label>
+      <textarea data-col="${escapeAttr(col)}">${escapeHtml(row.datos[col] ?? "")}</textarea>
+    </div>`;
+  });
+  elPanelDetalle.innerHTML = html;
+
+  elPanelDetalle.querySelectorAll("textarea").forEach((ta) => {
+    ta.addEventListener("input", () => {
+      row.datos[ta.dataset.col] = ta.value;
+    });
+    ta.addEventListener("blur", () => guardarFila(riSeleccionada));
+  });
+}
+
+/* ============================================================
    SELECCION DE FILA -> BUSCAR PAGINA + DIBUJAR BANDA
 ============================================================ */
 function selectRow(ri, scrollTable = true) {
@@ -577,6 +664,7 @@ function selectRow(ri, scrollTable = true) {
     const tr = document.querySelector(`#tableScroll tbody tr[data-ri="${ri}"]`);
     if (tr) tr.scrollIntoView({ block: "nearest" });
   }
+  renderPanelDetalle();
 
   const row = state.rows[ri];
   const from = row.desde;
