@@ -29,11 +29,24 @@
       <p>Sesión iniciada como</p>
       <p class="nombre" id="sesion-nombre"></p>
       <span class="rol-badge" id="sesion-rol"></span>
-      <br />
-      <a id="link-transcriptor" href="transcriptor.html" class="link-cambiar" hidden>Ir a Transcriptor →</a>
-      <br />
-      <a id="link-qa" href="qa.html" class="link-cambiar" hidden>Ir a QA →</a>
-      <br />
+
+      <div class="acciones-sesion">
+        <a id="link-transcriptor" href="transcriptor.html" class="accion-card" hidden>
+          <span class="accion-icono">📥</span>
+          <span class="accion-texto">
+            <span class="accion-titulo">Cargar sondaje</span>
+            <span class="accion-desc">Subir PDF y Excel ya transcritos</span>
+          </span>
+        </a>
+        <a id="link-qa" href="qa.html" class="accion-card" hidden>
+          <span class="accion-icono">🔍</span>
+          <span class="accion-texto">
+            <span class="accion-titulo">QA</span>
+            <span class="accion-desc">Revisar filas, fila por fila</span>
+          </span>
+        </a>
+      </div>
+
       <button type="button" id="btn-cambiar" class="link-cambiar">Cambiar de usuario</button>
     </div>
   </div>

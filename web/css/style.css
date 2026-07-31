@@ -41,6 +41,13 @@ body {
   text-align: center;
 }
 
+.subtitulo {
+  margin: -1.1rem 0 1.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: center;
+}
+
 label {
   display: block;
   font-size: 0.875rem;
@@ -139,6 +146,55 @@ button:not(:disabled):hover {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+}
+
+.acciones-sesion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.accion-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e2e5ea;
+  border-radius: 10px;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  background: #fafbfc;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.accion-card:hover {
+  border-color: #2563eb;
+  background: #f5f8ff;
+  transform: translateY(-1px);
+}
+
+.accion-icono {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.accion-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.accion-titulo {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.accion-desc {
+  font-size: 0.78rem;
+  color: #6b7280;
 }
 
 .link-cambiar {
