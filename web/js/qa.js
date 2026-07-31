@@ -251,12 +251,11 @@ function renderTable() {
   html += "</tbody></table>";
   elTableScroll.innerHTML = html;
 
-  elTableScroll.querySelectorAll(".depth-cell").forEach((td) => {
-    td.addEventListener("click", () => selectRow(parseInt(td.dataset.ri)));
+  elTableScroll.querySelectorAll("tbody tr").forEach((tr) => {
+    tr.addEventListener("click", () => selectRow(parseInt(tr.dataset.ri), false));
   });
   elTableScroll.querySelectorAll(".status-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
+    btn.addEventListener("click", () => {
       setStatus(parseInt(btn.dataset.ri), btn.dataset.s);
     });
   });
