@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graiph — QA Transcripción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Hanken+Grotesk:wght@100..900&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/qa.css">
+</head>
+<body>
+
+<header class="app-bar">
+  <div>
+    <div class="bar-title">Graiph — QA Transcripción</div>
+    <div class="bar-sub" id="barSub">Comparación PDF ↔ Excel, fila por fila</div>
+  </div>
+
+  <select class="holepick" id="selectorSondaje" style="display:none;"></select>
+
+  <div class="spacer"></div>
+
+  <div class="progress-wrap" id="progressWrap" style="display:none;">
+    <span id="progressTxt">0 / 0 revisadas</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+  </div>
+
+  <div class="barra-sesion-qa">
+    <span>Sesión: <strong id="barraNombre"></strong> (<span id="barraRol"></span>)</span>
+    <a id="btnCambiar">Cambiar de usuario</a>
+  </div>
+</header>
+
+<div id="avisoRol" class="aviso-rol-qa" hidden>
+  Tu rol no tiene acceso a esta pantalla. Solo los roles <strong>qa</strong> y <strong>admin</strong>
+  pueden revisar sondajes acá.
+</div>
+
+<div class="workspace" id="workspace" hidden>
+
+  <!-- ============ PDF PANE ============ -->
+  <div class="pdf-pane">
+    <div class="pdf-toolbar">
+      <button class="pg-btn" id="pgPrev">‹</button>
+      <span class="pg-label" id="pgLabel">— / —</span>
+      <button class="pg-btn" id="pgNext">›</button>
+      <span class="calib-status no" id="calibStatus">Página sin calibrar</span>
+      <button class="btn-calib" id="btnCalib">🎯 Calibrar página</button>
+      <span class="kbd-hint" id="calibHint"></span>
+    </div>
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="empty-hint" id="pdfEmptyHint">Elige un sondaje arriba para empezar.</div>
+    </div>
+  </div>
+
+  <!-- ============ TABLE PANE ============ -->
+  <div class="table-pane">
+    <div class="table-toolbar">
+      <div class="filter-chip active" data-f="todas">Todas</div>
+      <div class="filter-chip" data-f="pendiente">Pendientes</div>
+      <div class="filter-chip" data-f="aprobado">Aprobadas</div>
+      <div class="filter-chip" data-f="corregido">Corregidas</div>
+      <div class="filter-chip" data-f="rechazado">Rechazadas</div>
+      <span class="kbd-hint">↑↓ mover · <kbd>1</kbd> Aprobar <kbd>2</kbd> Corregir <kbd>3</kbd> Rechazar <kbd>0</kbd> Pendiente</span>
+    </div>
+    <div class="table-scroll" id="tableScroll">
+      <div class="drop-hint">Elige un sondaje arriba para ver sus filas.</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="vendor/pdf.min.js"></script>
+<script src="vendor/supabase-js.min.js"></script>
+<script src="config.js"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/session.js"></script>
+<script src="js/qa.js"></script>
+</body>
+</html>
