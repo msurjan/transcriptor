@@ -104,3 +104,22 @@ tbody tr.selected.status-rechazado{background:rgba(224,91,75,.14) !important;}
 .aviso-rol-qa{padding:40px;text-align:center;color:var(--muted);font-size:.9rem;}
 .selector-sondaje-wrap{padding:60px 20px;text-align:center;color:var(--muted);}
 .selector-sondaje-wrap select{margin-top:14px;}
+
+/* ---------- TUTORIAL ---------- */
+.tutorial-overlay{position:fixed;inset:0;background:rgba(5,6,11,.72);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;}
+.tutorial-modal{position:relative;background:var(--panel);border:1px solid var(--line2);border-radius:16px;max-width:480px;width:100%;padding:36px 32px 28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.tutorial-cerrar{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;line-height:1;padding:4px;}
+.tutorial-cerrar:hover{color:var(--ink);}
+.tutorial-icono{font-size:2.8rem;line-height:1;margin-bottom:14px;}
+.tutorial-titulo{font-family:'Bricolage Grotesque',sans-serif;font-size:1.15rem;color:var(--ink);margin-bottom:10px;}
+.tutorial-texto{font-size:.88rem;line-height:1.55;color:var(--muted);min-height:96px;}
+.tutorial-puntos{display:flex;justify-content:center;gap:6px;margin:18px 0 16px;}
+.tutorial-puntos span{width:7px;height:7px;border-radius:50%;background:var(--line2);}
+.tutorial-puntos span.activo{background:var(--green-br);}
+.tutorial-nav{display:flex;justify-content:space-between;gap:10px;}
+.tutorial-btn-nav{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:9px 14px;border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;}
+.tutorial-btn-nav:hover{border-color:var(--green-br);}
+.tutorial-btn-nav:disabled{opacity:.35;cursor:not-allowed;}
+.tutorial-btn-siguiente{background:linear-gradient(135deg,var(--green-br),var(--green-dp));color:#06170C;border:none;}
+.tutorial-no-mostrar{display:block;margin-top:18px;font-size:.74rem;color:var(--muted2);cursor:pointer;}
+.tutorial-no-mostrar input{margin-right:6px;vertical-align:middle;}
