@@ -100,7 +100,9 @@ async function cargarSondaje(sondajeId) {
     .single();
 
   if (errorSondaje || !sondaje) {
-    elTableScroll.innerHTML = '<div class="drop-hint">No se encontró ese sondaje.</div>';
+    const detalle = errorSondaje ? errorSondaje.message : "No se encontró ese sondaje.";
+    elTableScroll.innerHTML = `<div class="drop-hint">No se pudo cargar el sondaje: ${escapeHtml(detalle)}</div>`;
+    elBarSub.textContent = "Error al cargar el sondaje — revisa la consola (F12) o avisa a Marcelo.";
     console.error(errorSondaje);
     return;
   }
@@ -116,7 +118,7 @@ async function cargarSondaje(sondajeId) {
     .order("desde");
 
   if (errorFilas) {
-    elTableScroll.innerHTML = '<div class="drop-hint">No se pudieron cargar las filas.</div>';
+    elTableScroll.innerHTML = `<div class="drop-hint">No se pudieron cargar las filas: ${escapeHtml(errorFilas.message)}</div>`;
     console.error(errorFilas);
     return;
   }
