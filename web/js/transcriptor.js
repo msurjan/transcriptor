@@ -11,12 +11,84 @@ const elInputPdf = document.getElementById("input-pdf");
 const elInputExcel = document.getElementById("input-excel");
 const elBtnCargar = document.getElementById("btn-cargar");
 const elMensaje = document.getElementById("mensaje");
+const elCardListaSondajes = document.getElementById("card-lista-sondajes");
+const elListaSondajes = document.getElementById("lista-sondajes");
 
 const ROLES_CON_ACCESO = ["transcriptor", "admin"];
+const ROLES_QUE_BORRAN = ["admin"];
 
 function mostrarMensaje(texto, esError) {
   elMensaje.textContent = texto;
   elMensaje.classList.toggle("error", Boolean(esError));
+}
+
+function escapeHtml(v) {
+  return String(v ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+}
+function escapeAttr(v) {
+  return String(v ?? "").replace(/"/g, "&quot;");
+}
+
+async function cargarListaSondajesExistentes() {
+  const { data, error } = await supabaseClient
+    .from("sondajes")
+    .select("id, codigo, estado, pdf_path, empresas(nombre)")
+    .order("creado_en", { ascending: false });
+
+  if (error) {
+    elListaSondajes.innerHTML = `<p class="mensaje error">No se pudo cargar la lista: ${escapeHtml(error.message)}</p>`;
+    console.error(error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    elListaSondajes.innerHTML = '<p class="mensaje">Todavía no hay sondajes cargados.</p>';
+    return;
+  }
+
+  const puedeBorrar = ROLES_QUE_BORRAN.includes(usuario.rol);
+
+  let html = '<table class="tabla-sondajes"><thead><tr><th>Empresa</th><th>Código</th><th>Estado</th>';
+  if (puedeBorrar) html += "<th></th>";
+  html += "</tr></thead><tbody>";
+
+  for (const sondaje of data) {
+    html += `<tr><td>${escapeHtml(sondaje.empresas?.nombre || "?")}</td><td>${escapeHtml(sondaje.codigo)}</td><td><span class="estado-badge">${escapeHtml(sondaje.estado)}</span></td>`;
+    if (puedeBorrar) {
+      html += `<td><button type="button" class="btn-borrar" data-id="${sondaje.id}" data-codigo="${escapeAttr(sondaje.codigo)}" data-pdf="${escapeAttr(sondaje.pdf_path || "")}">Borrar</button></td>`;
+    }
+    html += "</tr>";
+  }
+  html += "</tbody></table>";
+  elListaSondajes.innerHTML = html;
+
+  if (puedeBorrar) {
+    elListaSondajes.querySelectorAll(".btn-borrar").forEach((boton) => {
+      boton.addEventListener("click", () =>
+        borrarSondaje(boton.dataset.id, boton.dataset.codigo, boton.dataset.pdf)
+      );
+    });
+  }
+}
+
+async function borrarSondaje(sondajeId, codigo, pdfPath) {
+  const confirmado = confirm(
+    `¿Seguro que quieres borrar el sondaje "${codigo}"? Esto borra también todas sus filas y el PDF. No se puede deshacer.`
+  );
+  if (!confirmado) return;
+
+  if (pdfPath) {
+    const { error: errorStorage } = await supabaseClient.storage.from("sondajes-pdfs").remove([pdfPath]);
+    if (errorStorage) console.error(errorStorage);
+  }
+
+  const { error } = await supabaseClient.from("sondajes").delete().eq("id", sondajeId);
+  if (error) {
+    alert("No se pudo borrar el sondaje: " + error.message);
+    return;
+  }
+
+  cargarListaSondajesExistentes();
 }
 
 async function cargarEmpresas() {
@@ -231,6 +303,7 @@ async function manejarEnvio(evento) {
   elInputPdf.value = "";
   elInputExcel.value = "";
   elBtnCargar.disabled = false;
+  cargarListaSondajesExistentes();
 }
 
 (function inicializar() {
@@ -249,9 +322,11 @@ async function manejarEnvio(evento) {
   if (!ROLES_CON_ACCESO.includes(usuario.rol)) {
     elAvisoRol.hidden = false;
     elForm.hidden = true;
+    elCardListaSondajes.hidden = true;
     return;
   }
 
   elForm.addEventListener("submit", manejarEnvio);
   cargarEmpresas();
+  cargarListaSondajesExistentes();
 })();

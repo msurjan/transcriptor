@@ -17,6 +17,15 @@ body {
   color: #1a1a1a;
 }
 
+.pagina-centrada {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+  width: 100%;
+}
+
 .card {
   background: #fff;
   border-radius: 12px;
@@ -142,4 +151,48 @@ button:not(:disabled):hover {
   text-decoration: underline;
   width: auto;
   padding: 0;
+}
+
+.tabla-sondajes {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.tabla-sondajes th,
+.tabla-sondajes td {
+  text-align: left;
+  padding: 0.55rem 0.4rem;
+  border-bottom: 1px solid #eceef1;
+  vertical-align: middle;
+}
+
+.tabla-sondajes th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+}
+
+.estado-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #eef2ff;
+  color: #3730a3;
+  white-space: nowrap;
+}
+
+.btn-borrar {
+  width: auto;
+  margin-top: 0;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+  background: #dc2626;
+}
+
+.btn-borrar:hover {
+  background: #b91c1c;
 }

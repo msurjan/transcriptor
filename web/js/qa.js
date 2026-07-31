@@ -20,6 +20,9 @@ const elCalibStatus = document.getElementById("calibStatus");
 const elBtnCalib = document.getElementById("btnCalib");
 const elCalibHint = document.getElementById("calibHint");
 const elCanvasWrap = document.getElementById("canvasWrap");
+const elZoomOut = document.getElementById("zoomOut");
+const elZoomIn = document.getElementById("zoomIn");
+const elZoomLabel = document.getElementById("zoomLabel");
 
 const elProgressWrap = document.getElementById("progressWrap");
 const elProgressTxt = document.getElementById("progressTxt");
@@ -42,7 +45,13 @@ const state = {
   calibClickCount: 0,
   calibPending: {},
   renderScale: 1.4,
+  zoom: 1,
 };
+
+const ANCHO_BASE_PDF = 620; // px, ancho de referencia al 100% de zoom
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 3;
+const ZOOM_PASO = 0.25;
 
 function escapeHtml(v) {
   return String(v ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
@@ -323,17 +332,15 @@ async function renderPdfPage(num) {
   const pdfCanvas = document.createElement("canvas");
   pdfCanvas.width = viewport.width;
   pdfCanvas.height = viewport.height;
-  pdfCanvas.style.width = "620px";
-  pdfCanvas.style.height = (620 * viewport.height) / viewport.width + "px";
   stack.appendChild(pdfCanvas);
 
   const overlay = document.createElement("canvas");
   overlay.id = "overlayCanvas";
   overlay.width = viewport.width;
   overlay.height = viewport.height;
-  overlay.style.width = pdfCanvas.style.width;
-  overlay.style.height = pdfCanvas.style.height;
   stack.appendChild(overlay);
+
+  aplicarTamanoDisplay();
 
   await page.render({ canvasContext: pdfCanvas.getContext("2d"), viewport }).promise;
   overlay.addEventListener("click", onOverlayClick);
@@ -343,6 +350,31 @@ async function renderPdfPage(num) {
 
   if (state.selectedRow >= 0) drawHighlightForSelected();
 }
+
+/* ============================================================
+   ZOOM (solo cambia el tamaño en pantalla, no la resolución interna
+   del canvas — así la calibración por píxel no se ve afectada)
+============================================================ */
+function aplicarTamanoDisplay() {
+  const pdfCanvas = document.querySelector("#canvasStack canvas:not(#overlayCanvas)");
+  const overlay = document.getElementById("overlayCanvas");
+  if (!pdfCanvas || !overlay) return;
+  const anchoDisplay = ANCHO_BASE_PDF * state.zoom;
+  const altoDisplay = (anchoDisplay * pdfCanvas.height) / pdfCanvas.width;
+  pdfCanvas.style.width = `${anchoDisplay}px`;
+  pdfCanvas.style.height = `${altoDisplay}px`;
+  overlay.style.width = pdfCanvas.style.width;
+  overlay.style.height = pdfCanvas.style.height;
+}
+
+function cambiarZoom(delta) {
+  state.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(state.zoom + delta).toFixed(2)));
+  elZoomLabel.textContent = `${Math.round(state.zoom * 100)}%`;
+  aplicarTamanoDisplay();
+}
+
+elZoomOut.addEventListener("click", () => cambiarZoom(-ZOOM_PASO));
+elZoomIn.addEventListener("click", () => cambiarZoom(ZOOM_PASO));
 
 /* ============================================================
    CALIBRACION (2 clics por página = escala lineal profundidad<->pixel)
