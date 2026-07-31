@@ -7,38 +7,47 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div class="card card-ancho">
-    <div class="barra-sesion">
-      <span>Sesión: <strong id="barra-nombre"></strong> (<span id="barra-rol"></span>)</span>
-      <button type="button" id="btn-cambiar" class="link-cambiar">Cambiar de usuario</button>
+  <div class="pagina-centrada">
+    <div class="card card-ancho">
+      <div class="barra-sesion">
+        <span>Sesión: <strong id="barra-nombre"></strong> (<span id="barra-rol"></span>)</span>
+        <button type="button" id="btn-cambiar" class="link-cambiar">Cambiar de usuario</button>
+      </div>
+
+      <h1>Transcriptor — Cargar sondaje</h1>
+
+      <div id="aviso-rol" class="mensaje error" hidden>
+        Tu rol no tiene acceso a esta pantalla. Solo los roles <strong>transcriptor</strong> y
+        <strong>admin</strong> pueden cargar sondajes.
+      </div>
+
+      <form id="form-transcriptor">
+        <label for="select-empresa">Empresa</label>
+        <select id="select-empresa" disabled required>
+          <option value="" disabled selected>Cargando empresas...</option>
+        </select>
+
+        <label for="input-codigo">Código del sondaje</label>
+        <input type="text" id="input-codigo" placeholder="ej. DDH-T-10" required />
+
+        <label for="input-pdf">PDF original</label>
+        <input type="file" id="input-pdf" accept="application/pdf" required />
+
+        <label for="input-excel">Excel ya transcrito (.xlsx)</label>
+        <input type="file" id="input-excel" accept=".xlsx,.xls" required />
+
+        <button type="submit" id="btn-cargar" disabled>Cargar sondaje</button>
+      </form>
+
+      <p id="mensaje" class="mensaje"></p>
     </div>
 
-    <h1>Transcriptor — Cargar sondaje</h1>
-
-    <div id="aviso-rol" class="mensaje error" hidden>
-      Tu rol no tiene acceso a esta pantalla. Solo los roles <strong>transcriptor</strong> y
-      <strong>admin</strong> pueden cargar sondajes.
+    <div class="card card-ancho" id="card-lista-sondajes">
+      <h1>Sondajes cargados</h1>
+      <div id="lista-sondajes">
+        <p class="mensaje">Cargando...</p>
+      </div>
     </div>
-
-    <form id="form-transcriptor">
-      <label for="select-empresa">Empresa</label>
-      <select id="select-empresa" disabled required>
-        <option value="" disabled selected>Cargando empresas...</option>
-      </select>
-
-      <label for="input-codigo">Código del sondaje</label>
-      <input type="text" id="input-codigo" placeholder="ej. DDH-T-10" required />
-
-      <label for="input-pdf">PDF original</label>
-      <input type="file" id="input-pdf" accept="application/pdf" required />
-
-      <label for="input-excel">Excel ya transcrito (.xlsx)</label>
-      <input type="file" id="input-excel" accept=".xlsx,.xls" required />
-
-      <button type="submit" id="btn-cargar" disabled>Cargar sondaje</button>
-    </form>
-
-    <p id="mensaje" class="mensaje"></p>
   </div>
 
   <script src="vendor/supabase-js.min.js"></script>
