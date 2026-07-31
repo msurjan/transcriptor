@@ -85,7 +85,8 @@ async function cargarListaSondajes(sondajeIdActual) {
 
 elSelectorSondaje.addEventListener("change", () => {
   if (elSelectorSondaje.value) {
-    window.location.href = `qa.html?sondaje=${elSelectorSondaje.value}`;
+    history.pushState(null, "", `?sondaje=${elSelectorSondaje.value}`);
+    cargarSondaje(elSelectorSondaje.value);
   }
 });
 
