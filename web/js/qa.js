@@ -234,7 +234,7 @@ function renderTable() {
     if (state.activeFilter !== "todas" && status !== state.activeFilter) return;
     html += `<tr data-ri="${ri}" class="${ri === state.selectedRow ? "selected " : ""}status-${status}">`;
     html += `<td><div class="status-cell">`;
-    ["aprobado", "corregido", "rechazado"].forEach((s) => {
+    ["aprobado", "corregido"].forEach((s) => {
       html += `<button class="status-btn ${status === s ? "on" : ""}" data-s="${s}" data-ri="${ri}" title="${s}">${s[0].toUpperCase()}</button>`;
     });
     html += `</div></td>`;
@@ -352,17 +352,52 @@ function iniciarResizeColumna(evento, col) {
 
 async function guardarFila(ri) {
   const fila = state.rows[ri];
-  const { error } = await supabaseClient
-    .from("filas_transcripcion")
-    .update({ datos: fila.datos, comentario_qa: fila.comentario_qa })
-    .eq("id", fila.id);
+  const cambios = { datos: fila.datos, comentario_qa: fila.comentario_qa };
+
+  // Editar cualquier campo de una fila pendiente la marca "Corregido" sola
+  // — queda registrado que hubo que arreglarla, sin que haga falta tocar
+  // los botones de estado a mano.
+  const pasaACorregido = fila.estado_qa === "pendiente";
+  if (pasaACorregido) {
+    cambios.estado_qa = "corregido";
+    cambios.revisado_por = usuario.id;
+    cambios.revisado_en = new Date().toISOString();
+  }
+
+  const { error } = await supabaseClient.from("filas_transcripcion").update(cambios).eq("id", fila.id);
   if (error) {
     console.error(error);
     mostrarErrorGuardado();
     alert("No se pudo guardar el cambio en esa fila. Revisa tu conexión e inténtalo de nuevo.");
     return;
   }
+
+  if (pasaACorregido) {
+    fila.estado_qa = cambios.estado_qa;
+    fila.revisado_por = cambios.revisado_por;
+    fila.revisado_en = cambios.revisado_en;
+    // Actualiza solo la fila afectada (no toda la tabla): esto se ejecuta
+    // después de un await, y reconstruir toda la tabla en ese momento
+    // podría cortar el foco si el usuario ya está escribiendo en otro campo.
+    actualizarClaseFila(ri);
+    updateProgress();
+    await revisarTransicionAEnValidacion();
+  }
   mostrarGuardado();
+}
+
+function actualizarClaseFila(ri) {
+  const fila = state.rows[ri];
+  const tr = document.querySelector(`#tableScroll tbody tr[data-ri="${ri}"]`);
+  if (!tr) return;
+  if (state.activeFilter !== "todas" && fila.estado_qa !== state.activeFilter) {
+    tr.remove();
+    return;
+  }
+  tr.className = `${ri === state.selectedRow ? "selected " : ""}status-${fila.estado_qa}`;
+  tr.querySelectorAll(".status-btn").forEach((btn) => {
+    btn.classList.toggle("on", btn.dataset.s === fila.estado_qa);
+  });
 }
 
 async function setStatus(ri, status) {
@@ -655,6 +690,13 @@ function renderPanelDetalle() {
    SELECCION DE FILA -> BUSCAR PAGINA + DIBUJAR BANDA
 ============================================================ */
 function selectRow(ri, scrollTable = true) {
+  const filaAnterior = state.selectedRow;
+  if (filaAnterior >= 0 && filaAnterior !== ri && state.rows[filaAnterior]?.estado_qa === "pendiente") {
+    // Se revisó (se pasó a otra fila) sin editar nada: se asume que estaba
+    // bien tal cual y queda "Aprobado" sola, sin tocar botones a mano.
+    aplicarEstado(filaAnterior, "aprobado");
+  }
+
   state.selectedRow = ri;
   document.querySelectorAll("#tableScroll tbody tr").forEach((tr) => {
     tr.classList.toggle("selected", parseInt(tr.dataset.ri) === ri);
@@ -741,9 +783,9 @@ document.addEventListener("keydown", (e) => {
       state.rows[next].estado_qa !== state.activeFilter
     );
     if (next >= 0 && next < state.rows.length) selectRow(next);
-  } else if (["1", "2", "3"].includes(e.key)) {
+  } else if (["1", "2"].includes(e.key)) {
     if (state.selectedRow >= 0) {
-      setStatus(state.selectedRow, { 1: "aprobado", 2: "corregido", 3: "rechazado" }[e.key]);
+      setStatus(state.selectedRow, { 1: "aprobado", 2: "corregido" }[e.key]);
     }
   } else if (e.key === "0") {
     if (state.selectedRow >= 0) aplicarEstado(state.selectedRow, "pendiente");
