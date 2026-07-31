@@ -9,7 +9,7 @@ Esa es la regla, no una sugerencia.
 
 | Decisión | Resuelto como | Por qué |
 |---|---|---|
-| Autenticación | Selector de nombre fijo, sin contraseña | Suficiente para atribuir cada acción a una persona. Seguridad real (passwords, recuperación de cuenta) queda fuera de v1 — no la necesitamos para medir productividad interna. |
+| Autenticación | Selector de nombre + contraseña compartida por rol (`admin` → "admin", el resto → "graiph"), actualizado 31-jul-2026 | No es seguridad real (la clave anon de Supabase ya queda visible en el navegador de todos modos) — es solo un filtro para que no entre cualquiera al usarse desde internet. Recuperación de cuenta y passwords por persona siguen fuera de v1. |
 | Validación del líder | Reusa el QA tool en "modo líder" | El líder ve lo que ya marcó el junior (estado + comentario) y agrega su propio veredicto. No se construye una pantalla nueva desde cero. |
 | Motor de construcción | Claude Code, único | No se mezcla con Antigravity en v1. |
 | Persistencia | Supabase (ya en uso en el cotizador) — Postgres + Storage + sin login de Supabase Auth (ver punto de autenticación) | Un solo backend para todas las herramientas de Graiph, no uno nuevo por proyecto. |
@@ -37,7 +37,7 @@ volumen de clientes en paralelo lo justifica.
 
 ## Fuera de alcance de v1 (explícitamente, para no reabrir la conversación cada vez)
 
-- Passwords / recuperación de cuenta / roles administrables desde UI.
+- Passwords por persona (individuales) / recuperación de cuenta / roles administrables desde UI. La contraseña compartida por rol (ver tabla de arriba) es la única excepción.
 - Log de auditoría completo (histórico de cada cambio de estado). v1 solo
   guarda el último estado + quién + cuándo, no el historial completo.
 - Vista en tiempo real del avance de todos los juniors para el CEO (más allá
