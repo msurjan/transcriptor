@@ -1,0 +1,63 @@
+# SCOPE — Graiph Transcripción de Sondajes (v1)
+
+Este documento es la fuente de verdad del alcance del MVP. Si en algún momento
+del desarrollo se propone agregar algo que no está aquí, la respuesta por
+defecto es NO hasta que se evalúe explícitamente y se actualice este archivo.
+Esa es la regla, no una sugerencia.
+
+## Decisiones de alcance ya cerradas (30-jul-2026)
+
+| Decisión | Resuelto como | Por qué |
+|---|---|---|
+| Autenticación | Selector de nombre fijo, sin contraseña | Suficiente para atribuir cada acción a una persona. Seguridad real (passwords, recuperación de cuenta) queda fuera de v1 — no la necesitamos para medir productividad interna. |
+| Validación del líder | Reusa el QA tool en "modo líder" | El líder ve lo que ya marcó el junior (estado + comentario) y agrega su propio veredicto. No se construye una pantalla nueva desde cero. |
+| Motor de construcción | Claude Code, único | No se mezcla con Antigravity en v1. |
+| Persistencia | Supabase (ya en uso en el cotizador) — Postgres + Storage + sin login de Supabase Auth (ver punto de autenticación) | Un solo backend para todas las herramientas de Graiph, no uno nuevo por proyecto. |
+| Descarga | Botón "Exportar" simultáneo: descarga .xlsx local + queda guardado en Supabase Storage | Ya lo teníamos resuelto en el QA tool v0, solo se conecta a Storage. |
+
+## Transcriptor: resuelto (30-jul-2026)
+
+**Opción A, manual vía Claude.ai.** El PDF se procesa en una conversación
+normal de Claude.ai (como se hizo con DDH-T-10 en este proyecto), siguiendo
+el master prompt/proceso ya validado. La pantalla Transcriptor NO llama a
+ninguna API — solo permite: elegir empresa, subir el PDF original, y subir
+el Excel ya transcrito (mismas columnas Desde/Hasta que usa el QA tool).
+
+Por qué: el costo marginal es cero (ya cubierto por la suscripción de
+Claude.ai), no hay que construir manejo de errores/reintentos de una API en
+producción, y hay un filtro humano gratis (quien transcribe ve la cartilla
+mientras la procesa) que una versión 100% automática no tendría.
+
+Automatizar esto vía API queda **fuera de alcance de v1** — no por costo de
+tokens (es bajo, unos $10-15 USD estimados para las 8.474 m de Tassa), sino
+porque la ingeniería de hacerlo confiable sin supervisión humana no está
+justificada todavía con un solo cliente en producción. Se reevalúa si el
+volumen de clientes en paralelo lo justifica.
+
+## Fuera de alcance de v1 (explícitamente, para no reabrir la conversación cada vez)
+
+- Passwords / recuperación de cuenta / roles administrables desde UI.
+- Log de auditoría completo (histórico de cada cambio de estado). v1 solo
+  guarda el último estado + quién + cuándo, no el historial completo.
+- Vista en tiempo real del avance de todos los juniors para el CEO (más allá
+  de lo que el líder ve en su propia validación).
+- Métrica de tiempo por fila (cronómetro automático). Se puede agregar
+  después si el piloto cronometrado del junior (pendiente desde el mensaje
+  anterior) confirma que vale la pena medirlo con precisión.
+- Multi-idioma, multi-tenant fuera de Graiph, cualquier cosa no mencionada
+  arriba.
+
+## Roles
+
+| Rol | Puede | No puede |
+|---|---|---|
+| `transcriptor` | Elegir empresa, subir PDF, cargar datos iniciales | Marcar estado QA ni validar |
+| `qa` | Marcar Aprobado/Corregido/Rechazado, editar valores, comentar | Validar como líder |
+| `lider` | Ver el trabajo de QA, marcar Validado/Rechazado final, exportar | — |
+| `admin` (Ignacio) | Todo lo anterior + gestionar empresas/usuarios | — |
+
+## Flujo de un sondaje
+
+```
+cargado -> en_qa -> en_validacion -> validado (exportable)
+```
