@@ -7,6 +7,9 @@ const elVistaSesion = document.getElementById("vista-sesion");
 const elSesionNombre = document.getElementById("sesion-nombre");
 const elSesionRol = document.getElementById("sesion-rol");
 const elBtnCambiar = document.getElementById("btn-cambiar");
+const elLinkTranscriptor = document.getElementById("link-transcriptor");
+
+const ROLES_CON_TRANSCRIPTOR = ["transcriptor", "admin"];
 
 function mostrarMensaje(texto, esError) {
   elMensaje.textContent = texto;
@@ -18,6 +21,7 @@ function mostrarSesionActiva(usuario) {
   elVistaSesion.hidden = false;
   elSesionNombre.textContent = usuario.nombre;
   elSesionRol.textContent = usuario.rol;
+  elLinkTranscriptor.hidden = !ROLES_CON_TRANSCRIPTOR.includes(usuario.rol);
 }
 
 function mostrarFormularioLogin() {

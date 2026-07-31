@@ -35,13 +35,42 @@ label {
   margin-bottom: 0.5rem;
 }
 
-select {
+select,
+input[type="text"],
+input[type="file"] {
   width: 100%;
   padding: 0.6rem 0.75rem;
   font-size: 1rem;
   border: 1px solid #d0d3d9;
   border-radius: 8px;
   background: #fff;
+}
+
+input[type="file"] {
+  padding: 0.45rem 0.5rem;
+}
+
+.card-ancho {
+  max-width: 480px;
+}
+
+form label:not(:first-child) {
+  margin-top: 1.1rem;
+}
+
+.barra-sesion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.85rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #eceef1;
+}
+
+.barra-sesion .link-cambiar {
+  margin-top: 0;
 }
 
 button {
