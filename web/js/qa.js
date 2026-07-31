@@ -65,7 +65,7 @@ const state = {
 
 const ANCHO_BASE_PDF = 620; // px, ancho de referencia al 100% de zoom
 const ZOOM_MIN = 0.5;
-const ZOOM_MAX = 3;
+const ZOOM_MAX = 5;
 const ZOOM_PASO = 0.25;
 
 function escapeHtml(v) {
@@ -552,6 +552,29 @@ function cambiarZoom(delta) {
   aplicarTamanoDisplay();
 }
 
+// Zoom tal que el ancho del PDF llene el ancho visible del panel (lo que
+// pedía el usuario como "350%, ancho de la pantalla todo el PDF") — se
+// calcula en vez de dejarlo fijo porque el ancho disponible cambia según
+// el tamaño de la ventana de cada uno.
+function calcularZoomAjustadoAncho() {
+  const PADDING_WRAP = 28; // 14px a cada lado (ver .canvas-wrap en qa.css)
+  const anchoDisponible = elCanvasWrap.clientWidth - PADDING_WRAP;
+  if (anchoDisponible <= 0) return state.zoom;
+  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(anchoDisponible / ANCHO_BASE_PDF).toFixed(2)));
+}
+
+function enfocarFilaSeleccionadaEnPdf(y1, y2) {
+  state.zoom = calcularZoomAjustadoAncho();
+  elZoomLabel.textContent = `${Math.round(state.zoom * 100)}%`;
+  aplicarTamanoDisplay();
+
+  const overlay = document.getElementById("overlayCanvas");
+  if (!overlay) return;
+  const escalaDisplay = overlay.clientHeight / overlay.height;
+  const yCentroDisplay = ((y1 + y2) / 2) * escalaDisplay;
+  elCanvasWrap.scrollTop = Math.max(0, yCentroDisplay - elCanvasWrap.clientHeight / 2);
+}
+
 elZoomOut.addEventListener("click", () => cambiarZoom(-ZOOM_PASO));
 elZoomIn.addEventListener("click", () => cambiarZoom(ZOOM_PASO));
 
@@ -713,7 +736,7 @@ function selectRow(ri, scrollTable = true) {
   });
   if (scrollTable) {
     const tr = document.querySelector(`#tableScroll tbody tr[data-ri="${ri}"]`);
-    if (tr) tr.scrollIntoView({ block: "nearest" });
+    if (tr) tr.scrollIntoView({ block: "center" });
   }
   renderPanelDetalle();
 
@@ -770,6 +793,8 @@ function drawHighlightForSelected() {
   ctx.strokeStyle = "#4BE07D";
   ctx.lineWidth = 2;
   ctx.strokeRect(0, Math.min(y1, y2), overlay.width, Math.max(2, Math.abs(y2 - y1)));
+
+  enfocarFilaSeleccionadaEnPdf(y1, y2);
 }
 
 /* ============================================================
