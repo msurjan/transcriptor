@@ -9,9 +9,17 @@ const elSesionRol = document.getElementById("sesion-rol");
 const elBtnCambiar = document.getElementById("btn-cambiar");
 const elLinkTranscriptor = document.getElementById("link-transcriptor");
 const elLinkQa = document.getElementById("link-qa");
+const elPassword = document.getElementById("input-password");
 
 const ROLES_CON_TRANSCRIPTOR = ["transcriptor", "admin"];
 const ROLES_CON_QA = ["qa", "admin"];
+
+// Contraseña compartida por rol, no por persona — es un filtro simple para
+// que no entre cualquiera, no seguridad real (la clave anon de Supabase ya
+// queda visible en el código del navegador de todos modos).
+function passwordEsperada(rol) {
+  return rol === "admin" ? "admin" : "graiph";
+}
 
 function mostrarMensaje(texto, esError) {
   elMensaje.textContent = texto;
@@ -78,7 +86,13 @@ elForm.addEventListener("submit", (evento) => {
     rol: opcionElegida.dataset.rol,
   };
 
+  if (elPassword.value !== passwordEsperada(usuario.rol)) {
+    mostrarMensaje("Contraseña incorrecta.", true);
+    return;
+  }
+
   guardarUsuarioSesion(usuario);
+  elPassword.value = "";
   mostrarMensaje("", false);
   mostrarSesionActiva(usuario);
 });
@@ -86,6 +100,7 @@ elForm.addEventListener("submit", (evento) => {
 elBtnCambiar.addEventListener("click", () => {
   borrarUsuarioSesion();
   elSelect.value = "";
+  elPassword.value = "";
   mostrarFormularioLogin();
 });
 
