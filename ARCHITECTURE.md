@@ -48,8 +48,21 @@ filas_transcripcion
 ```
 
 `estado` de un sondaje: `cargado -> en_qa -> en_validacion -> validado`.
-`estado_qa` de una fila: `pendiente | aprobado | corregido | rechazado`.
+`estado_qa` de una fila: `pendiente | aprobado | corregido | rechazado` (el
+esquema permite `rechazado`, pero la pantalla de QA ya no lo usa — ver
+"Marcado automático" abajo). `rechazado` sigue existiendo como valor válido
+por compatibilidad con datos viejos.
 `estado_lider` de una fila: `pendiente | validado | rechazado`.
+
+### Marcado automático de `estado_qa` (31-jul-2026)
+
+QA no marca a mano la mayoría de las filas: si el junior edita cualquier
+valor de una fila (mientras estaba `pendiente`), esa fila pasa sola a
+`corregido`. Si el junior pasa a otra fila sin haber editado la actual,
+esa fila pasa sola a `aprobado` (se asume que ya estaba bien). Los botones
+Aprobar/Corregir siguen disponibles para marcar a mano si hace falta. No
+existe un flujo de "rechazar" una fila — el trabajo es siempre revisar y
+corregir ahí mismo, no reenviar nada.
 
 ## Flujo end-to-end
 
