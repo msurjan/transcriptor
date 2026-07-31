@@ -30,6 +30,16 @@ const elProgressFill = document.getElementById("progressFill");
 
 const elTableScroll = document.getElementById("tableScroll");
 const elPanelDetalle = document.getElementById("panelDetalle");
+const elBtnTutorial = document.getElementById("btnTutorial");
+const elTutorialOverlay = document.getElementById("tutorialOverlay");
+const elTutorialIcono = document.getElementById("tutorialIcono");
+const elTutorialTitulo = document.getElementById("tutorialTitulo");
+const elTutorialTexto = document.getElementById("tutorialTexto");
+const elTutorialPuntos = document.getElementById("tutorialPuntos");
+const elTutorialAnterior = document.getElementById("tutorialAnterior");
+const elTutorialSiguiente = document.getElementById("tutorialSiguiente");
+const elTutorialCerrar = document.getElementById("tutorialCerrar");
+const elTutorialNoMostrar = document.getElementById("tutorialNoMostrar");
 const elGuardadoEstado = document.getElementById("guardadoEstado");
 
 const state = {
@@ -793,6 +803,128 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* ============================================================
+   TUTORIAL
+============================================================ */
+const TUTORIAL_PASOS = [
+  {
+    icono: "👋",
+    titulo: "Bienvenido a QA",
+    texto:
+      "Acá comparás el PDF original escaneado contra el Excel ya transcrito, fila por fila, para asegurarte de que todo esté bien antes de que el líder lo valide y se le mande al cliente.",
+  },
+  {
+    icono: "📋",
+    titulo: "1. Elegí un sondaje",
+    texto:
+      "Arriba a la izquierda, elegí de la lista el sondaje que te toca revisar. Solo aparecen los que ya están listos para revisar (estado \"en_qa\").",
+  },
+  {
+    icono: "🗂️",
+    titulo: "2. La pantalla se divide en dos",
+    texto:
+      "Arriba: la tabla con todas las filas transcritas. Abajo: el PDF original escaneado. Vas a ir comparando una contra la otra, fila por fila.",
+  },
+  {
+    icono: "🎯",
+    titulo: "3. Calibrá cada página del PDF (una vez)",
+    texto:
+      "Antes de poder ubicar cada fila en el PDF, hay que calibrar la página: tocá \"🎯 Calibrar página\", hacé clic en un punto de profundidad conocida y decí qué profundidad es, después repetí con un segundo punto bien separado del primero. Se hace una vez por página, no por fila.",
+  },
+  {
+    icono: "🔗",
+    titulo: "4. Elegí una fila y mirá el PDF",
+    texto:
+      "Tocá cualquier parte de una fila de la tabla — el PDF se ubica solo en la página correcta y resalta en verde el tramo (Desde–Hasta) que le corresponde a esa fila.",
+  },
+  {
+    icono: "✏️",
+    titulo: "5. Corregí lo que esté mal",
+    texto:
+      "Si algo no coincide con el PDF, editá el valor directo en la tabla. Apenas cambiás algo, esa fila queda marcada \"Corregido\" sola — no hace falta tocar ningún botón.",
+  },
+  {
+    icono: "✅",
+    titulo: "6. Lo que ya está bien, se aprueba solo",
+    texto:
+      "Si revisás una fila y no hace falta cambiar nada, pasá a la siguiente (flecha ↓ o clic en otra fila) — la anterior queda marcada \"Aprobado\" sola, sin que tengas que hacer nada más.",
+  },
+  {
+    icono: "🔍",
+    titulo: "7. Confianza y notas, aparte",
+    texto:
+      "Las columnas \"Confianza\" y \"Nota de confianza\" no están en la tabla principal — aparecen en un panel abajo, para la fila que tengas seleccionada en ese momento.",
+  },
+  {
+    icono: "⌨️",
+    titulo: "8. Atajos y ajustes",
+    texto:
+      "↑↓ para moverte entre filas, 1 para Aprobar, 2 para Corregir, 0 para volver a Pendiente. Arrastrá el borde de una columna para agrandarla, o hacé doble clic para que se ajuste sola. Los botones −/+ junto a \"Calibrar página\" acercan o alejan el PDF.",
+  },
+  {
+    icono: "🚀",
+    titulo: "9. Cuando termines el sondaje",
+    texto:
+      "Apenas todas las filas tengan un estado (Aprobado o Corregido), el sondaje pasa solo a \"en validación\". Ahí el líder revisa tu trabajo — la pantalla de exportación final para el cliente todavía no está construida, pero tu trabajo en QA ya queda guardado y listo para esa etapa.",
+  },
+];
+
+let tutorialPaso = 0;
+
+function tutorialClaveVisto() {
+  return `graiph_tutorial_visto_${usuario.id}`;
+}
+
+function renderTutorialPaso() {
+  const paso = TUTORIAL_PASOS[tutorialPaso];
+  elTutorialIcono.textContent = paso.icono;
+  elTutorialTitulo.textContent = paso.titulo;
+  elTutorialTexto.textContent = paso.texto;
+
+  elTutorialPuntos.innerHTML = "";
+  TUTORIAL_PASOS.forEach((_, i) => {
+    const punto = document.createElement("span");
+    punto.className = i === tutorialPaso ? "activo" : "";
+    elTutorialPuntos.appendChild(punto);
+  });
+
+  elTutorialAnterior.disabled = tutorialPaso === 0;
+  elTutorialSiguiente.textContent = tutorialPaso === TUTORIAL_PASOS.length - 1 ? "Listo ✓" : "Siguiente ›";
+}
+
+function abrirTutorial() {
+  tutorialPaso = 0;
+  renderTutorialPaso();
+  elTutorialOverlay.hidden = false;
+}
+
+function cerrarTutorial() {
+  elTutorialOverlay.hidden = true;
+  if (elTutorialNoMostrar.checked) {
+    localStorage.setItem(tutorialClaveVisto(), "1");
+  }
+}
+
+elBtnTutorial.addEventListener("click", abrirTutorial);
+elTutorialCerrar.addEventListener("click", cerrarTutorial);
+elTutorialAnterior.addEventListener("click", () => {
+  if (tutorialPaso > 0) {
+    tutorialPaso -= 1;
+    renderTutorialPaso();
+  }
+});
+elTutorialSiguiente.addEventListener("click", () => {
+  if (tutorialPaso < TUTORIAL_PASOS.length - 1) {
+    tutorialPaso += 1;
+    renderTutorialPaso();
+  } else {
+    cerrarTutorial();
+  }
+});
+elTutorialOverlay.addEventListener("click", (e) => {
+  if (e.target === elTutorialOverlay) cerrarTutorial();
+});
+
+/* ============================================================
    INICIALIZACION
 ============================================================ */
 (function inicializar() {
@@ -812,6 +944,10 @@ document.addEventListener("keydown", (e) => {
   }
 
   elWorkspace.hidden = false;
+
+  if (!localStorage.getItem(tutorialClaveVisto())) {
+    abrirTutorial();
+  }
 
   const parametros = new URLSearchParams(window.location.search);
   const sondajeId = parametros.get("sondaje");

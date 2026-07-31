@@ -29,6 +29,7 @@
   <span class="guardado-estado" id="guardadoEstado"></span>
 
   <div class="barra-sesion-qa">
+    <a id="btnTutorial">❓ Tutorial</a>
     <span>Sesión: <strong id="barraNombre"></strong> (<span id="barraRol"></span>)</span>
     <a id="btnCambiar">Cambiar de usuario</a>
   </div>
@@ -74,6 +75,23 @@
     </div>
   </div>
 
+</div>
+
+<div id="tutorialOverlay" class="tutorial-overlay" hidden>
+  <div class="tutorial-modal">
+    <button class="tutorial-cerrar" id="tutorialCerrar" title="Cerrar">✕</button>
+    <div class="tutorial-icono" id="tutorialIcono"></div>
+    <h2 class="tutorial-titulo" id="tutorialTitulo"></h2>
+    <p class="tutorial-texto" id="tutorialTexto"></p>
+    <div class="tutorial-puntos" id="tutorialPuntos"></div>
+    <div class="tutorial-nav">
+      <button class="tutorial-btn-nav" id="tutorialAnterior">‹ Anterior</button>
+      <button class="tutorial-btn-nav tutorial-btn-siguiente" id="tutorialSiguiente">Siguiente ›</button>
+    </div>
+    <label class="tutorial-no-mostrar">
+      <input type="checkbox" id="tutorialNoMostrar" /> No volver a mostrar esto al entrar
+    </label>
+  </div>
 </div>
 
 <script src="vendor/pdf.min.js"></script>
