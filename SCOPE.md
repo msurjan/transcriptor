@@ -14,6 +14,7 @@ Esa es la regla, no una sugerencia.
 | Motor de construcción | Claude Code, único | No se mezcla con Antigravity en v1. |
 | Persistencia | Supabase (ya en uso en el cotizador) — Postgres + Storage + sin login de Supabase Auth (ver punto de autenticación) | Un solo backend para todas las herramientas de Graiph, no uno nuevo por proyecto. |
 | Descarga | Botón "Exportar" simultáneo: descarga .xlsx local + queda guardado en Supabase Storage | Ya lo teníamos resuelto en el QA tool v0, solo se conecta a Storage. |
+| Borrar sondaje | Solo `admin`, desde la lista en `transcriptor.html`, con confirmación previa | Necesario para corregir errores de carga (empresa/código equivocado) sin dejar basura en la base. Borra la fila del sondaje (las filas de `filas_transcripcion` caen en cascada) y el PDF de Storage. |
 
 ## Transcriptor: resuelto (30-jul-2026)
 
@@ -54,7 +55,7 @@ volumen de clientes en paralelo lo justifica.
 | `transcriptor` | Elegir empresa, subir PDF, cargar datos iniciales | Marcar estado QA ni validar |
 | `qa` | Marcar Aprobado/Corregido/Rechazado, editar valores, comentar | Validar como líder |
 | `lider` | Ver el trabajo de QA, marcar Validado/Rechazado final, exportar | — |
-| `admin` (Ignacio) | Todo lo anterior + gestionar empresas/usuarios | — |
+| `admin` (Ignacio) | Todo lo anterior + gestionar empresas/usuarios + borrar sondajes ya cargados | — |
 
 ## Flujo de un sondaje
 
