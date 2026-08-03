@@ -5,9 +5,6 @@ const CAMPOS_ESPECIALES = ["desde", "hasta", "comentario_qa"];
 
 const usuario = exigirUsuarioSesion();
 
-const elBarraNombre = document.getElementById("barraNombre");
-const elBarraRol = document.getElementById("barraRol");
-const elBtnCambiar = document.getElementById("btnCambiar");
 const elAvisoRol = document.getElementById("avisoRol");
 const elWorkspace = document.getElementById("workspace");
 const elBarSub = document.getElementById("barSub");
@@ -30,7 +27,6 @@ const elProgressFill = document.getElementById("progressFill");
 
 const elTableScroll = document.getElementById("tableScroll");
 const elPanelDetalle = document.getElementById("panelDetalle");
-const elBtnTutorial = document.getElementById("btnTutorial");
 const elTutorialOverlay = document.getElementById("tutorialOverlay");
 const elTutorialIcono = document.getElementById("tutorialIcono");
 const elTutorialTitulo = document.getElementById("tutorialTitulo");
@@ -859,7 +855,7 @@ const TUTORIAL_PASOS = [
     icono: "🔗",
     titulo: "4. Elige una fila y mira el PDF",
     texto:
-      "Toca cualquier parte de una fila de la tabla — el PDF se ubica solo en la página correcta y resalta en verde el tramo (Desde–Hasta) que le corresponde a esa fila.",
+      "Toca cualquier parte de una fila de la tabla — el PDF se ubica solo en la página correcta, hace zoom hasta llenar el ancho de la pantalla y se centra en el tramo (Desde–Hasta) que le corresponde a esa fila, resaltado en verde.",
   },
   {
     icono: "✏️",
@@ -889,7 +885,13 @@ const TUTORIAL_PASOS = [
     icono: "🚀",
     titulo: "9. Cuando termines el sondaje",
     texto:
-      "Apenas todas las filas tengan un estado (Aprobado o Corregido), el sondaje pasa solo a \"en validación\". Ahí el líder revisa tu trabajo — la pantalla de exportación final para el cliente todavía no está construida, pero tu trabajo en QA ya queda guardado y listo para esa etapa.",
+      "Apenas todas las filas tengan un estado (Aprobado o Corregido), el sondaje pasa solo a \"en validación\". Ahí el líder revisa tu trabajo y, cuando está listo, lo exporta al cliente desde la pantalla \"Exportar\" (arriba, en el menú).",
+  },
+  {
+    icono: "🧭",
+    titulo: "10. Un solo lugar de trabajo",
+    texto:
+      "Arriba de todo tienes un menú para pasar de \"Cargar sondaje\" a \"QA\" o \"Exportar\" sin cerrar sesión — solo aparecen los módulos a los que tu rol tiene acceso.",
   },
 ];
 
@@ -929,7 +931,6 @@ function cerrarTutorial() {
   }
 }
 
-elBtnTutorial.addEventListener("click", abrirTutorial);
 elTutorialCerrar.addEventListener("click", cerrarTutorial);
 elTutorialAnterior.addEventListener("click", () => {
   if (tutorialPaso > 0) {
@@ -955,17 +956,17 @@ elTutorialOverlay.addEventListener("click", (e) => {
 (function inicializar() {
   if (!usuario) return; // exigirUsuarioSesion ya redirigió a index.html
 
-  elBarraNombre.textContent = usuario.nombre;
-  elBarraRol.textContent = usuario.rol;
-
-  elBtnCambiar.addEventListener("click", () => {
-    borrarUsuarioSesion();
-    window.location.href = "index.html";
-  });
+  renderTopNav("qa");
 
   if (!ROLES_CON_ACCESO_QA.includes(usuario.rol)) {
     elAvisoRol.hidden = false;
     return;
+  }
+
+  const elTopnavExtra = document.getElementById("topnav-extra");
+  if (elTopnavExtra) {
+    elTopnavExtra.innerHTML = '<button type="button" id="btnTutorial" class="topnav-extra-link">❓ Tutorial</button>';
+    document.getElementById("btnTutorial").addEventListener("click", abrirTutorial);
   }
 
   elWorkspace.hidden = false;

@@ -4,10 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Graiph — Transcripción de Sondajes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Hanken+Grotesk:wght@100..900&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
-  <div class="card">
+<body class="pagina-login">
+  <div id="topnav" class="topnav" hidden></div>
+
+  <div class="panel">
     <h1>Graiph — Transcripción de Sondajes</h1>
 
     <div id="vista-login">
@@ -20,7 +26,7 @@
         <label for="input-password">Contraseña</label>
         <input type="password" id="input-password" autocomplete="current-password" required />
 
-        <button type="submit" id="btn-entrar" disabled>Entrar</button>
+        <button type="submit" id="btn-entrar" class="btn" disabled>Entrar</button>
       </form>
       <p id="mensaje" class="mensaje"></p>
     </div>
@@ -53,8 +59,6 @@
           </span>
         </a>
       </div>
-
-      <button type="button" id="btn-cambiar" class="link-cambiar">Cambiar de usuario</button>
     </div>
   </div>
 
@@ -62,6 +66,7 @@
   <script src="config.js"></script>
   <script src="js/supabaseClient.js"></script>
   <script src="js/session.js"></script>
+  <script src="js/navbar.js"></script>
   <script src="js/login.js"></script>
 </body>
 </html>

@@ -1,8 +1,5 @@
 const usuario = exigirUsuarioSesion();
 
-const elBarraNombre = document.getElementById("barra-nombre");
-const elBarraRol = document.getElementById("barra-rol");
-const elBtnCambiar = document.getElementById("btn-cambiar");
 const elAvisoRol = document.getElementById("aviso-rol");
 const elForm = document.getElementById("form-transcriptor");
 const elSelectEmpresa = document.getElementById("select-empresa");
@@ -48,14 +45,14 @@ async function cargarListaSondajesExistentes() {
 
   const puedeBorrar = ROLES_QUE_BORRAN.includes(usuario.rol);
 
-  let html = '<table class="tabla-sondajes"><thead><tr><th>Empresa</th><th>Código</th><th>Estado</th>';
+  let html = '<table class="tabla"><thead><tr><th>Empresa</th><th>Código</th><th>Estado</th>';
   if (puedeBorrar) html += "<th></th>";
   html += "</tr></thead><tbody>";
 
   for (const sondaje of data) {
-    html += `<tr><td>${escapeHtml(sondaje.empresas?.nombre || "?")}</td><td>${escapeHtml(sondaje.codigo)}</td><td><span class="estado-badge">${escapeHtml(sondaje.estado)}</span></td>`;
+    html += `<tr><td>${escapeHtml(sondaje.empresas?.nombre || "?")}</td><td>${escapeHtml(sondaje.codigo)}</td><td><span class="badge">${escapeHtml(sondaje.estado)}</span></td>`;
     if (puedeBorrar) {
-      html += `<td><button type="button" class="btn-borrar" data-id="${sondaje.id}" data-codigo="${escapeAttr(sondaje.codigo)}" data-pdf="${escapeAttr(sondaje.pdf_path || "")}">Borrar</button></td>`;
+      html += `<td><button type="button" class="btn btn-peligro btn-pequeno" data-id="${sondaje.id}" data-codigo="${escapeAttr(sondaje.codigo)}" data-pdf="${escapeAttr(sondaje.pdf_path || "")}">Borrar</button></td>`;
     }
     html += "</tr>";
   }
@@ -63,7 +60,7 @@ async function cargarListaSondajesExistentes() {
   elListaSondajes.innerHTML = html;
 
   if (puedeBorrar) {
-    elListaSondajes.querySelectorAll(".btn-borrar").forEach((boton) => {
+    elListaSondajes.querySelectorAll(".btn-peligro").forEach((boton) => {
       boton.addEventListener("click", () =>
         borrarSondaje(boton.dataset.id, boton.dataset.codigo, boton.dataset.pdf)
       );
@@ -314,13 +311,7 @@ async function manejarEnvio(evento) {
     return; // exigirUsuarioSesion ya redirigió a index.html
   }
 
-  elBarraNombre.textContent = usuario.nombre;
-  elBarraRol.textContent = usuario.rol;
-
-  elBtnCambiar.addEventListener("click", () => {
-    borrarUsuarioSesion();
-    window.location.href = "index.html";
-  });
+  renderTopNav("transcriptor");
 
   if (!ROLES_CON_ACCESO.includes(usuario.rol)) {
     elAvisoRol.hidden = false;

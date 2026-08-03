@@ -2,9 +2,6 @@ const usuario = exigirUsuarioSesion();
 
 const ROLES_CON_ACCESO = ["lider", "admin"];
 
-const elBarraNombre = document.getElementById("barra-nombre");
-const elBarraRol = document.getElementById("barra-rol");
-const elBtnCambiar = document.getElementById("btn-cambiar");
 const elAvisoRol = document.getElementById("aviso-rol");
 const elPanel = document.getElementById("panel-exportar");
 const elTablaWrap = document.getElementById("tabla-wrap");
@@ -140,7 +137,7 @@ function renderTabla() {
     html += `<td><input type="checkbox" class="chk-sondaje" data-id="${sondaje.id}" ${marcado} /></td>`;
     html += `<td>${escapeHtml(sondaje.empresas?.nombre || "?")}</td>`;
     html += `<td>${escapeHtml(sondaje.codigo)}</td>`;
-    html += `<td><span class="estado-badge">${escapeHtml(sondaje.estado)}</span></td>`;
+    html += `<td><span class="badge">${escapeHtml(sondaje.estado)}</span></td>`;
 
     if (progreso.total === 0) {
       html += "<td>—</td>";
@@ -300,13 +297,7 @@ elBtnExportarCsv.addEventListener("click", () => exportarSeleccionados("csv"));
 (function inicializar() {
   if (!usuario) return; // exigirUsuarioSesion ya redirigió a index.html
 
-  elBarraNombre.textContent = usuario.nombre;
-  elBarraRol.textContent = usuario.rol;
-
-  elBtnCambiar.addEventListener("click", () => {
-    borrarUsuarioSesion();
-    window.location.href = "index.html";
-  });
+  renderTopNav("exportar");
 
   if (!ROLES_CON_ACCESO.includes(usuario.rol)) {
     elAvisoRol.hidden = false;

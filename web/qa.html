@@ -7,9 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Hanken+Grotesk:wght@100..900&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/qa.css">
 </head>
 <body>
+
+<div id="topnav" class="topnav" hidden></div>
 
 <header class="app-bar">
   <div>
@@ -27,12 +30,6 @@
   </div>
 
   <span class="guardado-estado" id="guardadoEstado"></span>
-
-  <div class="barra-sesion-qa">
-    <a id="btnTutorial">❓ Tutorial</a>
-    <span>Sesión: <strong id="barraNombre"></strong> (<span id="barraRol"></span>)</span>
-    <a id="btnCambiar">Cambiar de usuario</a>
-  </div>
 </header>
 
 <div id="avisoRol" class="aviso-rol-qa" hidden>
@@ -99,6 +96,7 @@
 <script src="config.js"></script>
 <script src="js/supabaseClient.js"></script>
 <script src="js/session.js"></script>
+<script src="js/navbar.js"></script>
 <script src="js/qa.js"></script>
 </body>
 </html>
