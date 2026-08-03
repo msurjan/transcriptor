@@ -9,10 +9,12 @@ const elSesionRol = document.getElementById("sesion-rol");
 const elBtnCambiar = document.getElementById("btn-cambiar");
 const elLinkTranscriptor = document.getElementById("link-transcriptor");
 const elLinkQa = document.getElementById("link-qa");
+const elLinkExportar = document.getElementById("link-exportar");
 const elPassword = document.getElementById("input-password");
 
 const ROLES_CON_TRANSCRIPTOR = ["transcriptor", "admin"];
 const ROLES_CON_QA = ["qa", "admin"];
+const ROLES_CON_EXPORTAR = ["lider", "admin"];
 
 // Contraseña compartida por rol, no por persona — es un filtro simple para
 // que no entre cualquiera, no seguridad real (la clave anon de Supabase ya
@@ -33,6 +35,7 @@ function mostrarSesionActiva(usuario) {
   elSesionRol.textContent = usuario.rol;
   elLinkTranscriptor.hidden = !ROLES_CON_TRANSCRIPTOR.includes(usuario.rol);
   elLinkQa.hidden = !ROLES_CON_QA.includes(usuario.rol);
+  elLinkExportar.hidden = !ROLES_CON_EXPORTAR.includes(usuario.rol);
 }
 
 function mostrarFormularioLogin() {
