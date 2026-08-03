@@ -15,6 +15,9 @@ Esa es la regla, no una sugerencia.
 | Persistencia | Supabase (ya en uso en el cotizador) — Postgres + Storage + sin login de Supabase Auth (ver punto de autenticación) | Un solo backend para todas las herramientas de Graiph, no uno nuevo por proyecto. |
 | Descarga | Botón "Exportar" simultáneo: descarga .xlsx local + queda guardado en Supabase Storage | Ya lo teníamos resuelto en el QA tool v0, solo se conecta a Storage. |
 | Borrar sondaje | Solo `admin`, desde la lista en `transcriptor.html`, con confirmación previa | Necesario para corregir errores de carga (empresa/código equivocado) sin dejar basura en la base. Borra la fila del sondaje (las filas de `filas_transcripcion` caen en cascada) y el PDF de Storage. |
+| Pantalla de exportación (3-ago-2026) | Pantalla nueva `exportar.html`, separada del QA tool, solo para `lider`/`admin`. Lista TODOS los sondajes (cualquier estado, no solo los validados) con progreso QA, % de efectividad del modelo y quién/cuándo exportó cada uno. Selección múltiple + exportar en `.xlsx` o `.csv`, un archivo por sondaje seleccionado (no un combinado). | El líder/admin necesita visibilidad de todo el pipeline, no solo de lo ya validado. "Un archivo por sondaje" porque cada sondaje es una entrega independiente al cliente. |
+| Auditoría de cambios | Se mantiene la decisión original: solo el último estado + quién + cuándo (`revisado_por/revisado_en`, `validado_por/validado_en`, y ahora `exportado_por/exportado_en`). NO se agrega un historial completo de cambios. | Confirmado explícitamente al construir la pantalla de exportación (3-ago-2026) — sigue fuera de alcance de v1, ver abajo. |
+| % de efectividad del modelo de transcripción | Campo por campo: se compara el valor final (post-QA) contra `datos_original` (snapshot tomado al momento de la carga, antes de cualquier edición de QA), por cada columna de cada fila. Sondajes cargados antes de este cambio no tienen `datos_original` y se muestran como "N/D", no como 0%. | Es la métrica más precisa para saber qué tan bien transcribe el modelo, no solo si la fila se tocó o no. |
 
 ## Transcriptor: resuelto (30-jul-2026)
 
@@ -54,7 +57,7 @@ volumen de clientes en paralelo lo justifica.
 |---|---|---|
 | `transcriptor` | Elegir empresa, subir PDF, cargar datos iniciales | Marcar estado QA ni validar |
 | `qa` | Marcar Aprobado/Corregido/Rechazado, editar valores, comentar | Validar como líder |
-| `lider` | Ver el trabajo de QA, marcar Validado/Rechazado final, exportar | — |
+| `lider` | Ver el trabajo de QA, marcar Validado/Rechazado final, exportar (`exportar.html`) | — |
 | `admin` (Ignacio) | Todo lo anterior + gestionar empresas/usuarios + borrar sondajes ya cargados | — |
 
 ## Flujo de un sondaje

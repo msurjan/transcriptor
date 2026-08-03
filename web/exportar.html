@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Exportar sondajes — Graiph</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/exportar.css" />
+</head>
+<body class="pagina-exportar">
+  <div class="contenedor-exportar">
+    <div class="barra-sesion">
+      <span>Sesión: <strong id="barra-nombre"></strong> (<span id="barra-rol"></span>)</span>
+      <button type="button" id="btn-cambiar" class="link-cambiar">Cambiar de usuario</button>
+    </div>
+
+    <h1>Exportar sondajes</h1>
+    <p class="subtitulo">Descarga los sondajes en CSV o XLSX y revisa quién exportó cada uno.</p>
+
+    <div id="aviso-rol" class="mensaje error" hidden>
+      Tu rol no tiene acceso a esta pantalla. Solo los roles <strong>lider</strong> y <strong>admin</strong>
+      pueden exportar sondajes.
+    </div>
+
+    <div id="panel-exportar" hidden>
+      <div class="barra-acciones-exportar">
+        <label class="chk-todos">
+          <input type="checkbox" id="chk-todos" /> Seleccionar todos
+        </label>
+        <span id="contador-seleccion" class="contador-seleccion">0 seleccionados</span>
+        <div class="spacer-exportar"></div>
+        <button type="button" id="btn-exportar-xlsx" class="btn-exportar" disabled>⬇️ Exportar (.xlsx)</button>
+        <button type="button" id="btn-exportar-csv" class="btn-exportar" disabled>⬇️ Exportar (.csv)</button>
+      </div>
+
+      <div id="tabla-wrap">
+        <p id="mensaje-lista" class="mensaje">Cargando sondajes...</p>
+      </div>
+    </div>
+  </div>
+
+<script src="vendor/xlsx.min.js"></script>
+<script src="vendor/supabase-js.min.js"></script>
+<script src="config.js"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/session.js"></script>
+<script src="js/exportar.js"></script>
+</body>
+</html>

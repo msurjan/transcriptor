@@ -6,7 +6,7 @@
   en el cotizador) — se agregan tablas nuevas ahí, no se crea un proyecto
   Supabase separado. Un solo backend para todas las herramientas internas.
 - **Frontend**: HTML + JS vanilla, sin framework, una página por rol
-  (`transcriptor.html`, `qa.html`, con un parámetro de modo para el líder).
+  (`transcriptor.html`, `qa.html`, `exportar.html`).
   Es la misma línea de las dos herramientas ya construidas (cotizador, QA
   tool v0) — no se introduce React/Next.js para una app de 3 pantallas y
   ~5 usuarios internos. Si el proyecto crece, se reevalúa; no antes.
@@ -40,12 +40,19 @@ ordenar/filtrar — todo lo demás es variable por empresa y vive en el jsonb.
 ```
 usuarios          (id, nombre, rol, activo)
 empresas          (id, nombre, config_plantilla jsonb)   -- futuro: leyenda de códigos por empresa
-sondajes          (id, empresa_id, codigo, pdf_path, estado, creado_por, creado_en)
+sondajes          (id, empresa_id, codigo, pdf_path, columnas jsonb, estado, creado_por, creado_en,
+                   exportado_por, exportado_en)
 filas_transcripcion
-                  (id, sondaje_id, desde, hasta, datos jsonb,
+                  (id, sondaje_id, desde, hasta, datos jsonb, datos_original jsonb,
                    estado_qa, comentario_qa, revisado_por, revisado_en,
                    estado_lider, comentario_lider, validado_por, validado_en)
 ```
+
+`datos_original` es una copia de `datos` tomada en el momento de la carga
+(antes de cualquier edición de QA) — nunca se modifica después. Sirve solo
+para calcular el % de efectividad del modelo en `exportar.html`; sondajes
+cargados antes de este campo lo tienen `null` y su efectividad se muestra
+como "N/D".
 
 `estado` de un sondaje: `cargado -> en_qa -> en_validacion -> validado`.
 `estado_qa` de una fila: `pendiente | aprobado | corregido | rechazado` (el
@@ -82,12 +89,19 @@ corregir ahí mismo, no reenviar nada.
    siempre queda a la vista tanto en la tabla como en el PDF.
 3. Cuando todas las filas de un sondaje tienen `estado_qa != pendiente`, el
    sondaje pasa a `en_validacion`.
-4. **Líder** abre la misma pantalla en modo líder (`qa.html?sondaje=ID&modo=lider`):
-   ve el estado_qa y comentario de cada fila, puede editar si encuentra un
-   error, y marca `estado_lider`. Cuando el 100% está `validado`, el sondaje
-   pasa a `validado` y aparece el botón de exportación final.
-5. **Exportar**: descarga el .xlsx localmente Y lo sube a Supabase Storage
-   (bucket `sondajes-exportados`) en el mismo click.
+4. **Líder** abre la misma pantalla en modo líder (`qa.html?sondaje=ID&modo=lider`,
+   **todavía no construido**): ve el estado_qa y comentario de cada fila,
+   puede editar si encuentra un error, y marca `estado_lider`. Cuando el
+   100% está `validado`, el sondaje pasa a `validado`.
+5. **Exportar** (`exportar.html`, roles `lider`/`admin`): pantalla aparte
+   que lista TODOS los sondajes (cualquier estado), con progreso de QA y %
+   de efectividad del modelo por sondaje. Se pueden seleccionar varios con
+   checkboxes ("Seleccionar todos" incluido) y exportar en `.xlsx` o `.csv`
+   — un archivo por sondaje seleccionado, descargado localmente Y subido a
+   Supabase Storage (bucket `sondajes-exportados`) en el mismo click. Cada
+   exportación deja registrado `exportado_por`/`exportado_en` en `sondajes`
+   (se sobrescribe en cada nueva exportación — no hay historial de
+   exportaciones anteriores, ver "Auditoría" en SCOPE.md).
 
 ## Métrica "cuánto revisa cada usuario"
 

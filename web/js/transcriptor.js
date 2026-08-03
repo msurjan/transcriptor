@@ -268,6 +268,7 @@ async function manejarEnvio(evento) {
     desde: fila.desde,
     hasta: fila.hasta,
     datos: fila.datos,
+    datos_original: fila.datos,
   }));
 
   const { error: errorFilas } = await supabaseClient
