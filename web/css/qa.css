@@ -1,19 +1,11 @@
-:root{
-  --bg:#0A0B14; --panel:#14162A; --panel2:#1A1D33; --line:#242843; --line2:#343A5C;
-  --ink:#ECEEF5; --muted:#9AA0B8; --muted2:#646B86;
-  --green:#34CC67; --green-br:#4BE07D; --green-dp:#1E9A48;
-  --amber:#E0B84B; --red:#E05B4B; --navy:#121423;
-  --mono:'JetBrains Mono', monospace;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-[hidden]{display:none !important;}
-body{font-family:'Hanken Grotesk',sans-serif;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden;font-size:13px;}
-::-webkit-scrollbar{width:8px;height:8px;}
-::-webkit-scrollbar-track{background:var(--bg);}
-::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px;}
-::-webkit-scrollbar-thumb:hover{background:var(--green);}
+/* Variables, reset, [hidden] y scrollbar ahora viven en app.css
+   (cargado antes que este archivo) — acá solo lo específico de QA. */
+body{height:100vh;overflow:hidden;font-size:13px;display:flex;flex-direction:column;}
+
+#topnav{flex-shrink:0;}
 
 .app-bar{
+  flex-shrink:0;
   background:rgba(10,11,20,.92); border-bottom:1px solid var(--line);
   padding:10px 18px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;
 }
@@ -29,15 +21,11 @@ select.holepick{background:var(--panel2);border:1px solid var(--line);color:var(
 .progress-bar{width:140px;height:7px;background:var(--panel2);border-radius:4px;overflow:hidden;border:1px solid var(--line);}
 .progress-fill{height:100%;background:var(--grad,var(--green));transition:width .2s;}
 
-.barra-sesion-qa{display:flex;align-items:center;gap:10px;font-size:.74rem;color:var(--muted);}
-.barra-sesion-qa strong{color:var(--ink);}
-.barra-sesion-qa a{color:var(--green-br);text-decoration:underline;cursor:pointer;background:none;border:none;font-size:.74rem;}
-
 .guardado-estado{font-size:.72rem;font-weight:700;color:var(--green-br);opacity:0;transition:opacity .25s;white-space:nowrap;}
 .guardado-estado.visible{opacity:1;}
 .guardado-estado.error{color:var(--red);}
 
-.workspace{display:grid;grid-template-rows:minmax(0,1fr) minmax(0,1fr);height:calc(100vh - 52px);}
+.workspace{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) minmax(0,1fr);}
 
 /* ---------- LEFT: PDF ---------- */
 .pdf-pane{border-top:1px solid var(--line);display:flex;flex-direction:column;background:#05060B;min-height:0;}

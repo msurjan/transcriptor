@@ -4,16 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cargar sondaje — Graiph</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Hanken+Grotesk:wght@100..900&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
-  <div class="pagina-centrada">
-    <div class="card card-ancho">
-      <div class="barra-sesion">
-        <span>Sesión: <strong id="barra-nombre"></strong> (<span id="barra-rol"></span>)</span>
-        <button type="button" id="btn-cambiar" class="link-cambiar">Cambiar de usuario</button>
-      </div>
+  <div id="topnav" class="topnav" hidden></div>
 
+  <div class="pagina-angosta">
+    <div class="panel">
       <h1>Cargar sondaje</h1>
       <p class="subtitulo">Sube el PDF original y el Excel ya transcrito.</p>
 
@@ -37,13 +37,13 @@
         <label for="input-excel">Excel ya transcrito (.xlsx)</label>
         <input type="file" id="input-excel" accept=".xlsx,.xls" required />
 
-        <button type="submit" id="btn-cargar" disabled>Cargar sondaje</button>
+        <button type="submit" id="btn-cargar" class="btn" disabled>Cargar sondaje</button>
       </form>
 
       <p id="mensaje" class="mensaje"></p>
     </div>
 
-    <div class="card card-ancho" id="card-lista-sondajes">
+    <div class="panel" id="card-lista-sondajes">
       <h1>Sondajes cargados</h1>
       <div id="lista-sondajes">
         <p class="mensaje">Cargando...</p>
@@ -56,6 +56,7 @@
   <script src="config.js"></script>
   <script src="js/supabaseClient.js"></script>
   <script src="js/session.js"></script>
+  <script src="js/navbar.js"></script>
   <script src="js/transcriptor.js"></script>
 </body>
 </html>

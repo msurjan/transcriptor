@@ -1,49 +1,26 @@
-body.pagina-exportar {
-  display: block;
-  align-items: initial;
-  justify-content: initial;
-  padding: 2rem 1.5rem;
-}
-
-.contenedor-exportar {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.contenedor-exportar h1 {
-  margin: 0 0 0.3rem;
-}
-
-.contenedor-exportar .subtitulo {
-  margin: 0 0 1.5rem;
-  text-align: left;
-}
-
-.contenedor-exportar .barra-sesion {
-  border-bottom: none;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0;
-}
-
+/* Ajustes específicos de exportar.html — paletas y componentes
+   compartidos (botones, panel, badges) viven en app.css. */
 .barra-acciones-exportar {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  background: #fff;
-  border: 1px solid #e2e5ea;
+  background: var(--panel);
+  border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 0.75rem 1rem;
+  padding: .75rem 1rem;
   margin-bottom: 1rem;
 }
 
 .chk-todos {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
+  gap: .4rem;
+  font-size: .85rem;
   font-weight: 600;
+  color: var(--ink);
   cursor: pointer;
+  margin-bottom: 0;
 }
 
 .chk-todos input {
@@ -51,58 +28,43 @@ body.pagina-exportar {
 }
 
 .contador-seleccion {
-  font-size: 0.8rem;
-  color: #6b7280;
+  font-size: .8rem;
+  color: var(--muted);
 }
 
 .spacer-exportar {
   flex: 1;
 }
 
-.btn-exportar {
-  width: auto;
-  margin-top: 0;
-  padding: 0.5rem 0.9rem;
-  font-size: 0.85rem;
-  background: #2563eb;
-}
-
-.btn-exportar:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-
 #tabla-wrap {
-  background: #fff;
-  border: 1px solid #e2e5ea;
-  border-radius: 10px;
   overflow-x: auto;
-  padding: 0.25rem;
+  padding: .25rem;
 }
 
 .tabla-exportar {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.83rem;
+  font-size: .83rem;
 }
 
 .tabla-exportar th,
 .tabla-exportar td {
   text-align: left;
-  padding: 0.6rem 0.6rem;
-  border-bottom: 1px solid #eceef1;
+  padding: .6rem .6rem;
+  border-bottom: 1px solid var(--line);
   vertical-align: middle;
   white-space: nowrap;
 }
 
 .tabla-exportar th {
-  font-size: 0.7rem;
+  font-size: .7rem;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: #6b7280;
+  letter-spacing: .03em;
+  color: var(--muted);
 }
 
 .tabla-exportar tbody tr:hover {
-  background: #fafbfc;
+  background: rgba(255, 255, 255, .02);
 }
 
 .tabla-exportar input[type="checkbox"] {
@@ -112,20 +74,21 @@ body.pagina-exportar {
 .barra-progreso-mini {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: .4rem;
 }
 
 .barra-progreso-mini .pista {
   width: 60px;
   height: 6px;
-  background: #eceef1;
+  background: var(--panel2);
   border-radius: 3px;
   overflow: hidden;
+  border: 1px solid var(--line);
 }
 
 .barra-progreso-mini .relleno {
   height: 100%;
-  background: #2563eb;
+  background: var(--green);
 }
 
 .efectividad-valor {
@@ -133,32 +96,32 @@ body.pagina-exportar {
 }
 
 .efectividad-alta {
-  color: #15803d;
+  color: var(--green-br);
 }
 
 .efectividad-media {
-  color: #b45309;
+  color: var(--amber);
 }
 
 .efectividad-baja {
-  color: #b91c1c;
+  color: var(--red);
 }
 
 .efectividad-nd {
-  color: #9ca3af;
+  color: var(--muted2);
   font-weight: 400;
 }
 
 .exportado-nunca {
-  color: #9ca3af;
+  color: var(--muted2);
 }
 
 .exportado-info {
-  font-size: 0.78rem;
-  color: #374151;
+  font-size: .78rem;
+  color: var(--ink);
 }
 
 .exportado-info small {
   display: block;
-  color: #9ca3af;
+  color: var(--muted2);
 }

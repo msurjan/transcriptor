@@ -4,16 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Exportar sondajes — Graiph</title>
-<link rel="stylesheet" href="css/style.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Hanken+Grotesk:wght@100..900&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css" />
 <link rel="stylesheet" href="css/exportar.css" />
 </head>
-<body class="pagina-exportar">
-  <div class="contenedor-exportar">
-    <div class="barra-sesion">
-      <span>Sesión: <strong id="barra-nombre"></strong> (<span id="barra-rol"></span>)</span>
-      <button type="button" id="btn-cambiar" class="link-cambiar">Cambiar de usuario</button>
-    </div>
+<body>
+  <div id="topnav" class="topnav" hidden></div>
 
+  <div class="pagina">
     <h1>Exportar sondajes</h1>
     <p class="subtitulo">Descarga los sondajes en CSV o XLSX y revisa quién exportó cada uno.</p>
 
@@ -29,11 +29,11 @@
         </label>
         <span id="contador-seleccion" class="contador-seleccion">0 seleccionados</span>
         <div class="spacer-exportar"></div>
-        <button type="button" id="btn-exportar-xlsx" class="btn-exportar" disabled>⬇️ Exportar (.xlsx)</button>
-        <button type="button" id="btn-exportar-csv" class="btn-exportar" disabled>⬇️ Exportar (.csv)</button>
+        <button type="button" id="btn-exportar-xlsx" class="btn btn-pequeno" disabled>⬇️ Exportar (.xlsx)</button>
+        <button type="button" id="btn-exportar-csv" class="btn btn-pequeno btn-secundario" disabled>⬇️ Exportar (.csv)</button>
       </div>
 
-      <div id="tabla-wrap">
+      <div class="panel" id="tabla-wrap">
         <p id="mensaje-lista" class="mensaje">Cargando sondajes...</p>
       </div>
     </div>
@@ -44,6 +44,7 @@
 <script src="config.js"></script>
 <script src="js/supabaseClient.js"></script>
 <script src="js/session.js"></script>
+<script src="js/navbar.js"></script>
 <script src="js/exportar.js"></script>
 </body>
 </html>

@@ -1,0 +1,417 @@
+/* ============================================================
+   Graiph — sistema de diseño compartido por toda la plataforma
+   (login, cargar sondaje, QA, exportar). Un solo tema oscuro,
+   una sola barra de navegación superior — no son apps separadas.
+============================================================ */
+:root {
+  --bg: #0A0B14;
+  --panel: #14162A;
+  --panel2: #1A1D33;
+  --line: #242843;
+  --line2: #343A5C;
+  --ink: #ECEEF5;
+  --muted: #9AA0B8;
+  --muted2: #646B86;
+  --green: #34CC67;
+  --green-br: #4BE07D;
+  --green-dp: #1E9A48;
+  --amber: #E0B84B;
+  --red: #E05B4B;
+  --navy: #121423;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  font-family: 'Hanken Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+h1, h2, h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+}
+
+/* ---------- Barra de navegación superior (compartida) ---------- */
+.topnav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 10px 18px;
+  background: rgba(10, 11, 20, .92);
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.topnav-marca {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  background: linear-gradient(90deg, #fff 30%, var(--green-br) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.topnav-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.topnav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.topnav-link:hover {
+  color: var(--ink);
+  border-color: var(--line2);
+}
+
+.topnav-link.activo {
+  color: var(--green-br);
+  background: rgba(52, 204, 103, .1);
+  border-color: rgba(52, 204, 103, .35);
+}
+
+.topnav-extra {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topnav-extra-link {
+  color: var(--green-br);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: .78rem;
+  font-family: inherit;
+}
+
+.topnav-spacer {
+  flex: 1;
+}
+
+.topnav-usuario {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: .78rem;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+.topnav-usuario-nombre {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.topnav-usuario-rol {
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  font-size: .68rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+}
+
+.topnav-btn-cambiar {
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: .78rem;
+  font-family: inherit;
+  padding: 0;
+}
+
+.topnav-btn-cambiar:hover {
+  color: var(--ink);
+}
+
+/* ---------- Contenedores de página genéricos ---------- */
+.pagina {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.pagina-angosta {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.75rem;
+}
+
+.panel + .panel {
+  margin-top: 1.25rem;
+}
+
+.subtitulo {
+  color: var(--muted);
+  font-size: .85rem;
+  margin: -.6rem 0 1.5rem;
+}
+
+/* ---------- Formularios ---------- */
+label {
+  display: block;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: .4rem;
+}
+
+form label:not(:first-child) {
+  margin-top: 1.1rem;
+}
+
+select,
+input[type="text"],
+input[type="password"],
+input[type="file"] {
+  width: 100%;
+  padding: .6rem .75rem;
+  font-size: .9rem;
+  font-family: inherit;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  background: var(--panel2);
+  color: var(--ink);
+}
+
+select:focus,
+input:focus {
+  outline: none;
+  border-color: var(--green-br);
+}
+
+input[type="file"] {
+  padding: .45rem .5rem;
+  color: var(--muted);
+}
+
+/* ---------- Botones ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: .65rem 1.1rem;
+  font-size: .88rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #06170C;
+  background: linear-gradient(135deg, var(--green-br), var(--green-dp));
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.btn:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+.btn-secundario {
+  color: var(--ink);
+  background: var(--panel2);
+  border: 1px solid var(--line2);
+}
+
+.btn-secundario:not(:disabled):hover {
+  border-color: var(--green-br);
+  filter: none;
+}
+
+.btn-peligro {
+  color: #2A0A06;
+  background: var(--red);
+}
+
+.btn-peligro:not(:disabled):hover {
+  filter: brightness(1.1);
+}
+
+.btn-ancho-completo {
+  width: 100%;
+}
+
+.btn-pequeno {
+  padding: .35rem .7rem;
+  font-size: .78rem;
+}
+
+form > .btn {
+  width: 100%;
+  margin-top: 1.25rem;
+}
+
+/* ---------- Mensajes ---------- */
+.mensaje {
+  margin-top: 1rem;
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+.mensaje.error {
+  color: var(--red);
+}
+
+/* ---------- Tablas genéricas (listas de sondajes) ---------- */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+
+.tabla th,
+.tabla td {
+  text-align: left;
+  padding: .6rem .5rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.tabla th {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  color: var(--muted);
+}
+
+.tabla tbody tr:hover {
+  background: rgba(255, 255, 255, .02);
+}
+
+.badge {
+  display: inline-block;
+  padding: .15rem .55rem;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  background: var(--panel2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.badge-verde {
+  color: var(--green-br);
+  background: rgba(52, 204, 103, .1);
+  border-color: rgba(52, 204, 103, .35);
+}
+
+/* ---------- Sesión (login) ---------- */
+.sesion {
+  text-align: center;
+}
+
+.sesion .nombre {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.rol-badge {
+  display: inline-block;
+  margin-top: .5rem;
+  padding: .25rem .75rem;
+  border-radius: 999px;
+  background: rgba(52, 204, 103, .12);
+  color: var(--green-br);
+  border: 1px solid rgba(52, 204, 103, .35);
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+.acciones-sesion {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  margin-top: 1.5rem;
+}
+
+.accion-card {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  background: var(--panel2);
+  transition: border-color .15s, transform .1s;
+}
+
+.accion-card:hover {
+  border-color: var(--green-br);
+  transform: translateY(-1px);
+}
+
+.accion-icono {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.accion-texto {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.accion-titulo {
+  font-weight: 700;
+  font-size: .95rem;
+  color: var(--ink);
+}
+
+.accion-desc {
+  font-size: .78rem;
+  color: var(--muted);
+}

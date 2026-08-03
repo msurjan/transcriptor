@@ -5,8 +5,14 @@
 - **Backend**: Supabase (Postgres + Storage). Ya existe el proyecto (se usa
   en el cotizador) — se agregan tablas nuevas ahí, no se crea un proyecto
   Supabase separado. Un solo backend para todas las herramientas internas.
-- **Frontend**: HTML + JS vanilla, sin framework, una página por rol
-  (`transcriptor.html`, `qa.html`, `exportar.html`).
+- **Frontend**: HTML + JS vanilla, sin framework, una página por módulo
+  (`transcriptor.html`, `qa.html`, `exportar.html`), pero NO son apps
+  independientes: comparten un mismo sistema de diseño (`css/app.css`, tema
+  oscuro) y una barra de navegación superior compartida (`js/navbar.js`,
+  `renderTopNav(paginaActual)`) que se renderiza en cada página logueada.
+  La sesión vive en `sessionStorage` (ver `js/session.js`), así que pasar de
+  un módulo a otro con los links de la barra no pide contraseña de nuevo —
+  es una sola plataforma con varias pantallas, no módulos sueltos.
   Es la misma línea de las dos herramientas ya construidas (cotizador, QA
   tool v0) — no se introduce React/Next.js para una app de 3 pantallas y
   ~5 usuarios internos. Si el proyecto crece, se reevalúa; no antes.
